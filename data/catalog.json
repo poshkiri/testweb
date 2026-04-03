@@ -1,0 +1,130 @@
+{
+  "products": [
+    {
+      "id": "p1",
+      "name": "Фаршированные перцы",
+      "price": 655,
+      "image": "https://images.unsplash.com/photo-1547592166-23ac45744acd?auto=format&fit=crop&w=900&q=80",
+      "unit": "4-5 шт",
+      "category": "Полуфабрикаты",
+      "description": "Говядина, домашняя заморозка."
+    },
+    {
+      "id": "p2",
+      "name": "Голубцы",
+      "price": 465,
+      "image": "https://images.unsplash.com/photo-1565299585323-38174c4a6d41?auto=format&fit=crop&w=900&q=80",
+      "unit": "6 шт",
+      "category": "Полуфабрикаты",
+      "description": "Говядина, капуста, рис."
+    },
+    {
+      "id": "p3",
+      "name": "Мясные гнезда с грибами",
+      "price": 395,
+      "image": "https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=900&q=80",
+      "unit": "4 шт",
+      "category": "Полуфабрикаты",
+      "description": "Говядина, сыр, грибы."
+    },
+    {
+      "id": "p4",
+      "name": "Куриные гнезда с картофелем",
+      "price": 355,
+      "image": "https://images.unsplash.com/photo-1604908176997-4317f71b6ec8?auto=format&fit=crop&w=900&q=80",
+      "unit": "4 шт",
+      "category": "Полуфабрикаты",
+      "description": "Курица, сыр, картофель."
+    },
+    {
+      "id": "p5",
+      "name": "Мясные биточки с моцареллой",
+      "price": 570,
+      "image": "https://images.unsplash.com/photo-1529042410759-befb1204b468?auto=format&fit=crop&w=900&q=80",
+      "unit": "6 шт",
+      "category": "Полуфабрикаты",
+      "description": "Говядина и нежная моцарелла."
+    },
+    {
+      "id": "p6",
+      "name": "Фрикадельки",
+      "price": 475,
+      "image": "https://images.unsplash.com/photo-1529042350493-5f2f8ccbcf0d?auto=format&fit=crop&w=900&q=80",
+      "unit": "0.5 кг",
+      "category": "Полуфабрикаты",
+      "description": "Домашние фрикадельки из говядины."
+    },
+    {
+      "id": "p7",
+      "name": "Куриные котлеты с цукини",
+      "price": 415,
+      "image": "https://images.unsplash.com/photo-1585238342024-78d387f4a707?auto=format&fit=crop&w=900&q=80",
+      "unit": "0.5 кг",
+      "category": "Полуфабрикаты",
+      "description": "Легкие куриные котлеты."
+    },
+    {
+      "id": "p8",
+      "name": "Домашние котлеты",
+      "price": 540,
+      "image": "https://images.unsplash.com/photo-1551504734-5ee1c4a1479b?auto=format&fit=crop&w=900&q=80",
+      "unit": "6 шт",
+      "category": "Полуфабрикаты",
+      "description": "Говядина + свинина."
+    },
+    {
+      "id": "p9",
+      "name": "Куриные котлеты с творогом",
+      "price": 455,
+      "image": "https://images.unsplash.com/photo-1604908554185-c87e7f89f4df?auto=format&fit=crop&w=900&q=80",
+      "unit": "6 шт",
+      "category": "Полуфабрикаты",
+      "description": "Сочные котлеты с мягким вкусом."
+    },
+    {
+      "id": "p10",
+      "name": "Блины с мясом и рисом",
+      "price": 80,
+      "image": "https://images.unsplash.com/photo-1587731472724-4b7a4f8ad705?auto=format&fit=crop&w=900&q=80",
+      "unit": "за 1 шт",
+      "category": "Блины",
+      "description": "Тонкие блины с мясной начинкой."
+    },
+    {
+      "id": "p11",
+      "name": "Блины с курицей и сыром",
+      "price": 76,
+      "image": "https://images.unsplash.com/photo-1519676867240-f03562e64548?auto=format&fit=crop&w=900&q=80",
+      "unit": "за 1 шт",
+      "category": "Блины",
+      "description": "Начинка из курицы и сыра."
+    },
+    {
+      "id": "p12",
+      "name": "Пельмени (говядина)",
+      "price": 900,
+      "image": "https://images.unsplash.com/photo-1604908811816-ea56059c0f5e?auto=format&fit=crop&w=900&q=80",
+      "unit": "за 1 кг",
+      "category": "Полуфабрикаты",
+      "description": "Классические домашние пельмени."
+    },
+    {
+      "id": "p13",
+      "name": "Сырники классические",
+      "price": 330,
+      "image": "https://images.unsplash.com/photo-1551024601-bec78aea704b?auto=format&fit=crop&w=900&q=80",
+      "unit": "6 шт",
+      "category": "Завтраки",
+      "description": "Нежные сырники для завтрака."
+    },
+    {
+      "id": "p14",
+      "name": "Маринованная капуста",
+      "price": 200,
+      "image": "https://images.unsplash.com/photo-1512621776951-a57141f2eefd?auto=format&fit=crop&w=900&q=80",
+      "unit": "за 1 л",
+      "category": "Дополнительно",
+      "description": "Домашняя заготовка."
+    }
+  ]
+}

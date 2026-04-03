@@ -1,0 +1,109 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Каталог | Наконец-то вкусно</title>
+    <script src="assets/js/theme-init.js"></script>
+    <link rel="stylesheet" href="assets/css/styles.css" />
+  </head>
+  <body>
+    <div id="header-root"></div>
+    <main>
+      <div class="container">
+        <h1 class="section-title">Каталог товаров</h1>
+        <div id="product-grid" class="grid"></div>
+      </div>
+    </main>
+    <div id="footer-root"></div>
+    <script src="assets/js/products.js"></script>
+    <script src="assets/js/cart.js"></script>
+    <script src="assets/js/layout.js"></script>
+    <script>
+      function emptyCatalogMessage() {
+        if (location.protocol === "file:") {
+          return (
+            "<p class='muted'>Страница открыта как файл с диска — каталог так не загрузится. " +
+            "Запустите сервер в папке проекта командой <code>npm run start</code> и откройте в браузере " +
+            "<code>http://localhost:3001/catalog.html</code> (номер порта смотрите в консоли после запуска).</p>"
+          );
+        }
+        var hint = window.__catalogLoadHint;
+        if (hint === "empty") {
+          return (
+            "<p class='muted'>В каталоге пока нет товаров. Добавьте позиции на странице " +
+            "<a href='admin.html'>редактирования каталога</a> (нужен секретный ключ от администратора).</p>"
+          );
+        }
+        if (hint === "failed") {
+          return (
+            "<p class='muted'><strong>Не удалось загрузить каталог.</strong> Обычно это значит, что не запущен сервер сайта. " +
+            "В папке проекта выполните <code>npm run start</code>, затем обновите эту страницу. " +
+            "Адрес в браузере должен быть вида <code>http://localhost:…</code>, а не файл с диска.</p>"
+          );
+        }
+        return (
+          "<p class='muted'>Каталог недоступен. Проверьте, что сервер запущен, и обновите страницу.</p>"
+        );
+      }
+
+      function renderProducts() {
+        const root = document.getElementById("product-grid");
+        if (!window.PRODUCTS.length) {
+          root.innerHTML = emptyCatalogMessage();
+          return;
+        }
+        root.innerHTML = window.PRODUCTS.map(function (p) {
+          var name = window.escapeHtml(p.name);
+          var desc = window.escapeHtml(p.description || "");
+          var img = window.escapeHtml(p.image || "");
+          var id = window.escapeHtml(p.id);
+          var unit = window.escapeHtml(p.unit || "");
+          return (
+            '<article class="product-card">' +
+            '<img src="' +
+            img +
+            '" alt="' +
+            name +
+            '" />' +
+            '<div class="product-content">' +
+            "<strong>" +
+            name +
+            "</strong>" +
+            '<span class="muted">' +
+            desc +
+            "</span>" +
+            '<div class="price-line">' +
+            "<span>" +
+            window.CartStore.formatRub(p.price) +
+            " / " +
+            unit +
+            "</span>" +
+            '<button class="btn" data-id="' +
+            id +
+            '">В корзину</button>' +
+            "</div>" +
+            "</div>" +
+            "</article>"
+          );
+        }).join("");
+
+        root.querySelectorAll("button[data-id]").forEach((btn) => {
+          btn.addEventListener("click", () => {
+            window.CartStore.addToCart(btn.dataset.id, 1);
+            btn.textContent = "Добавлено";
+            setTimeout(() => (btn.textContent = "В корзину"), 700);
+          });
+        });
+      }
+
+      document.addEventListener("DOMContentLoaded", function () {
+        if (typeof ensureProductsLoaded === "function") {
+          ensureProductsLoaded().then(renderProducts);
+        } else {
+          renderProducts();
+        }
+      });
+    </script>
+  </body>
+  </html>

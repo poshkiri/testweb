@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Оформление заказа | Наконец-то вкусно</title>
+    <script src="assets/js/theme-init.js"></script>
+    <link rel="stylesheet" href="assets/css/styles.css" />
+  </head>
+  <body>
+    <div id="header-root"></div>
+    <main>
+      <div class="container">
+        <h1 class="section-title">Оформление заказа</h1>
+        <div class="grid">
+          <section class="panel">
+            <h3>Данные получателя</h3>
+            <form id="checkout-form">
+              <input name="name" placeholder="Имя" required />
+              <input name="phone" placeholder="Телефон" required />
+              <input name="address" placeholder="Адрес доставки" required />
+              <select name="contactMethod">
+                <option value="">Предпочтительный способ связи</option>
+                <option value="phone">Телефон</option>
+                <option value="whatsapp">WhatsApp</option>
+                <option value="telegram">Telegram</option>
+              </select>
+              <textarea name="comment" rows="4" placeholder="Комментарий к заказу"></textarea>
+              <label><input type="checkbox" required /> Согласен(на) на обработку персональных данных</label>
+              <button class="btn primary" type="submit">Перейти к оплате</button>
+            </form>
+            <p id="checkout-result" class="muted"></p>
+          </section>
+          <section class="panel">
+            <h3>Ваш заказ</h3>
+            <div id="checkout-items"></div>
+          </section>
+        </div>
+      </div>
+    </main>
+    <div id="footer-root"></div>
+    <script src="assets/js/products.js"></script>
+    <script src="assets/js/cart.js"></script>
+    <script src="assets/js/layout.js"></script>
+    <script src="assets/js/checkout.js"></script>
+  </body>
+  </html>

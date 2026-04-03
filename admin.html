@@ -1,0 +1,228 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="robots" content="noindex, nofollow" />
+    <title>Каталог — редактирование</title>
+    <script src="assets/js/theme-init.js"></script>
+    <link rel="stylesheet" href="assets/css/styles.css" />
+    <style>
+      .admin-textarea {
+        width: 100%;
+        min-height: 420px;
+        font-family: ui-monospace, Consolas, monospace;
+        font-size: 0.85rem;
+        line-height: 1.45;
+        margin-top: 12px;
+      }
+      .admin-toolbar {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        align-items: center;
+        margin-bottom: 8px;
+      }
+      .admin-toolbar input[type="password"] {
+        flex: 1;
+        min-width: 200px;
+        max-width: 360px;
+      }
+      .admin-instruction {
+        background: color-mix(in srgb, var(--green) 6%, var(--surface));
+        border: 1px solid var(--border);
+        border-radius: var(--radius, 14px);
+        padding: 18px 20px;
+        margin-bottom: 18px;
+      }
+      .admin-instruction h2 {
+        margin: 0 0 12px;
+        font-family: var(--font-display);
+        font-size: 1.25rem;
+      }
+      .admin-steps {
+        margin: 0;
+        padding-left: 1.25rem;
+      }
+      .admin-steps li {
+        margin-bottom: 10px;
+      }
+      .admin-steps li:last-child {
+        margin-bottom: 0;
+      }
+      .admin-details {
+        margin-top: 14px;
+        border-top: 1px solid var(--border);
+        padding-top: 12px;
+      }
+      .admin-details summary {
+        cursor: pointer;
+        font-weight: 600;
+        color: var(--green);
+      }
+      .admin-details[open] summary {
+        margin-bottom: 8px;
+      }
+      .admin-field-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 0.92rem;
+        margin-top: 8px;
+      }
+      .admin-field-table th,
+      .admin-field-table td {
+        border: 1px solid var(--border);
+        padding: 8px 10px;
+        text-align: left;
+        vertical-align: top;
+      }
+      .admin-field-table th {
+        background: color-mix(in srgb, var(--brown) 5%, var(--surface));
+        font-weight: 600;
+      }
+      .admin-warning {
+        margin-top: 12px;
+        padding: 10px 12px;
+        border-radius: 10px;
+        background: color-mix(in srgb, #b71c1c 8%, var(--surface));
+        border: 1px solid color-mix(in srgb, #b71c1c 25%, var(--border));
+        font-size: 0.92rem;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="header-root"></div>
+    <main>
+      <div class="container">
+        <h1 class="section-title">Редактирование каталога</h1>
+
+        <section class="admin-instruction" aria-labelledby="admin-start-title">
+          <h2 id="admin-start-title">С чего начать (коротко)</h2>
+          <ol class="admin-steps">
+            <li>
+              <strong>Получите секретный ключ</strong> у того, кто настраивал сайт (разработчик / администратор). Сам ключ
+              прописывается на сервере в файле настроек, обычно это не ваш уровень — просто попросите готовый ключ.
+            </li>
+            <li>
+              <strong>Откройте эту страницу</strong> в браузере (закладку вам дадут или пришлют ссылку вида
+              <code>…/admin.html</code>).
+            </li>
+            <li>
+              Вставьте ключ в поле ниже и нажмите <strong>«Загрузить с сервера»</strong> — подгрузится текущий список
+              блюд.
+            </li>
+            <li>
+              <strong>Чтобы добавить блюдо:</strong> в большом поле найдите блок одного товара (между <code>{</code> и
+              <code>}</code>), скопируйте его целиком, вставьте копию ниже через запятую. В копии поменяйте
+              <code>id</code> (уникальный, например <code>p15</code>), <code>name</code>, <code>price</code>,
+              <code>unit</code>, при необходимости ссылку на фото <code>image</code>.
+            </li>
+            <li>
+              Нажмите <strong>«Сохранить»</strong>, затем откройте
+              <a href="catalog.html">витрину каталога</a> и обновите страницу (F5), чтобы увидеть изменения.
+            </li>
+          </ol>
+
+          <div class="admin-details">
+            <details>
+              <summary>Шпаргалка: что значит каждое поле</summary>
+              <table class="admin-field-table">
+                <thead>
+                  <tr>
+                    <th>Поле</th>
+                    <th>Обязательно?</th>
+                    <th>Что писать</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td><code>id</code></td>
+                    <td>да</td>
+                    <td>Уникальный код латиницей, без пробелов, например <code>p15</code>. Для каждого блюда свой.</td>
+                  </tr>
+                  <tr>
+                    <td><code>name</code></td>
+                    <td>да</td>
+                    <td>Название на сайте, как увидит покупатель.</td>
+                  </tr>
+                  <tr>
+                    <td><code>price</code></td>
+                    <td>да</td>
+                    <td>Цена числом, без «₽», например <code>450</code>.</td>
+                  </tr>
+                  <tr>
+                    <td><code>unit</code></td>
+                    <td>да</td>
+                    <td>Как считается цена: <code>6 шт</code>, <code>за 1 кг</code> и т.д.</td>
+                  </tr>
+                  <tr>
+                    <td><code>image</code></td>
+                    <td>желательно</td>
+                    <td>Ссылка на картинку в интернете. Если не уверены — попросите разработчика залить фото и дать ссылку.</td>
+                  </tr>
+                  <tr>
+                    <td><code>category</code></td>
+                    <td>нет</td>
+                    <td>Группа для себя, на сайте можно использовать позже. Например «Блины».</td>
+                  </tr>
+                  <tr>
+                    <td><code>description</code></td>
+                    <td>нет</td>
+                    <td>Короткое описание под названием.</td>
+                  </tr>
+                </tbody>
+              </table>
+            </details>
+          </div>
+
+          <div class="admin-details">
+            <details>
+              <summary>Если не сохраняется или «неверный ключ»</summary>
+              <ul class="admin-steps" style="list-style: disc; padding-left: 1.25rem">
+                <li>Проверьте, что ключ скопирован полностью, без пробела в начале или конце.</li>
+                <li>Убедитесь, что сайт запущен на сервере (без этого кнопка «Сохранить» не сработает).</li>
+                <li>Если пишет про JSON — где-то лишняя или пропущенная запятая/кавычка; сравните с соседними блоками.</li>
+                <li>В спорном случае пришлите разработчику текст из поля или скрин ошибки.</li>
+              </ul>
+            </details>
+          </div>
+
+          <p class="admin-warning">
+            <strong>Важно:</strong> не удаляйте кавычки <code>"</code> и запятые между блоками. Перед большими правками
+            скопируйте весь текст в «Блокнот» — так будет запасная копия.
+          </p>
+        </section>
+
+        <section class="panel">
+          <p class="muted">
+            Ниже — технический формат (JSON): один каталог и для витрины, и для приёма заказов. Ключ
+            <code>CATALOG_ADMIN_TOKEN</code> задаётся на сервере в файле <code>.env</code> — его настраивает
+            администратор сайта.
+          </p>
+          <div class="admin-toolbar">
+            <input
+              type="password"
+              id="admin-token"
+              autocomplete="off"
+              placeholder="Секретный ключ"
+              aria-label="Секретный ключ"
+            />
+            <button type="button" class="btn" id="btn-load">Загрузить с сервера</button>
+            <button type="button" class="btn primary" id="btn-save">Сохранить</button>
+          </div>
+          <textarea
+            id="catalog-json"
+            class="admin-textarea"
+            spellcheck="false"
+            aria-label="JSON каталога"
+          ></textarea>
+          <p id="admin-msg" class="muted"></p>
+        </section>
+      </div>
+    </main>
+    <div id="footer-root"></div>
+    <script src="assets/js/cart.js"></script>
+    <script src="assets/js/layout.js"></script>
+    <script src="assets/js/admin.js"></script>
+  </body>
+</html>

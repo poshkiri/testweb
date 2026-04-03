@@ -1,0 +1,28 @@
+---
+description: TЗ workflow execution protocol from scope to delivery
+alwaysApply: true
+---
+
+# TЗ Execution Workflow
+
+Follow this sequence for every client website task:
+
+1. Restate goal, constraints, and expected outcome in 3-6 bullets.
+2. Decompose work into small subtasks with clear completion criteria.
+3. Prioritize by dependency: unblockers -> core flow -> polish.
+4. Delegate only independent subtasks; keep integration decisions centralized.
+5. Execute one subtask at a time and report progress briefly.
+6. After each subtask, run a verification step (logic, lint, runtime, UX).
+7. Do not move to the next subtask until current acceptance criteria pass.
+8. Track out-of-scope requests and propose them as separate change items.
+9. Keep decisions reversible until final acceptance.
+10. End with a delivery checklist and explicit "done/not done" status.
+
+# Subtask Template
+
+- Objective:
+- Inputs:
+- Steps:
+- Acceptance criteria:
+- Verification method:
+- Risks/dependencies:

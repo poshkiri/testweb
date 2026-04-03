@@ -1,0 +1,32 @@
+---
+description: Quality gates for TЗ delivery, delegation, and validation
+alwaysApply: true
+---
+
+# TЗ Quality Gates
+
+Before marking any work complete, enforce these gates:
+
+1. Scope gate: output matches approved TЗ and assumptions are explicit.
+2. Simplicity gate: choose the simplest solution that meets requirements.
+3. Maintainability gate: structure is clean, readable, and easy to extend.
+4. SOLID/KISS gate: avoid hidden coupling and unnecessary abstractions.
+5. Verification gate: checks are executed and outcomes are documented.
+6. Regression gate: confirm no previously working path was broken.
+7. Handover gate: include files changed, what was done, and next actions.
+
+# Delegation Rules
+
+- Delegate only isolated tasks with clear I/O boundaries.
+- Require each delegated task to return: result, evidence, unresolved issues.
+- Re-check delegated outputs before integration.
+- If evidence is missing, treat the task as incomplete.
+
+# Done Definition
+
+Work is "done" only if:
+
+- acceptance criteria are met,
+- verification passed,
+- residual risks are listed,
+- handover summary is clear for the client/team.

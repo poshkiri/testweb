@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Корзина | Наконец-то вкусно</title>
+    <script src="assets/js/theme-init.js"></script>
+    <link rel="stylesheet" href="assets/css/styles.css" />
+  </head>
+  <body>
+    <div id="header-root"></div>
+    <main>
+      <div class="container">
+        <h1 class="section-title">Корзина</h1>
+        <section class="panel">
+          <div id="cart-list" class="cart-list"></div>
+          <div id="cart-summary"></div>
+        </section>
+      </div>
+    </main>
+    <div id="footer-root"></div>
+    <script src="assets/js/products.js"></script>
+    <script src="assets/js/cart.js"></script>
+    <script src="assets/js/layout.js"></script>
+    <script>
+      function renderCart() {
+        const list = document.getElementById("cart-list");
+        const summary = document.getElementById("cart-summary");
+        const items = window.CartStore.getCartDetailedItems();
+
+        if (!items.length) {
+          list.innerHTML = "<p class='muted'>Корзина пока пустая.</p>";
+          summary.innerHTML = "<a class='btn primary' href='catalog.html'>Выбрать товары</a>";
+          return;
+        }
+
+        list.innerHTML = items.map(
+          (item) => `
+          <article class="cart-item">
+            <div>
+              <strong>${item.name}</strong>
+              <div class="muted">${window.CartStore.formatRub(item.price)} / ${item.unit}</div>
+            </div>
+            <div class="qty-controls">
+              <button data-action="minus" data-id="${item.id}">-</button>
+              <span>${item.quantity}</span>
+              <button data-action="plus" data-id="${item.id}">+</button>
+            </div>
+            <div>
+              <strong>${window.CartStore.formatRub(item.lineTotal)}</strong>
+            </div>
+          </article>
+        `
+        ).join("");
+
+        const totals = window.CartStore.getCartTotals();
+        summary.innerHTML = `
+          <p><strong>Итого: ${window.CartStore.formatRub(totals.total)}</strong></p>
+          <div class="actions">
+            <a class="btn" href="catalog.html">Продолжить покупки</a>
+            <a class="btn primary" href="checkout.html">Оформить заказ</a>
+          </div>
+        `;
+
+        list.querySelectorAll("button[data-id]").forEach((btn) => {
+          btn.addEventListener("click", () => {
+            const { id, action } = btn.dataset;
+            const current = window.CartStore.getCartDetailedItems().find((i) => i.id === id)?.quantity || 1;
+            const next = action === "plus" ? current + 1 : current - 1;
+            window.CartStore.setCartQuantity(id, next);
+            renderCart();
+          });
+        });
+      }
+
+      window.addEventListener("cart:changed", renderCart);
+      document.addEventListener("DOMContentLoaded", function () {
+        if (typeof ensureProductsLoaded === "function") {
+          ensureProductsLoaded().then(renderCart);
+        } else {
+          renderCart();
+        }
+      });
+    </script>
+  </body>
+  </html>
