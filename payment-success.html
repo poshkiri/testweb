@@ -3,18 +3,79 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Оплата | Наконец-то вкусно</title>
+    <title>Заказ принят | Наконец-то вкусно</title>
     <script src="assets/js/theme-init.js"></script>
     <link rel="stylesheet" href="assets/css/styles.css" />
+    <style>
+      .status-badge {
+        display: inline-flex;
+        align-items: center;
+        border-radius: 999px;
+        padding: 6px 12px;
+        color: #fff;
+        font-weight: 700;
+        font-size: 0.9rem;
+      }
+      .status-new { background: #2e7d32; }
+      .status-preparing { background: #ef6c00; }
+      .status-ready { background: #1565c0; }
+      .status-delivering { background: #6a1b9a; }
+      .status-done { background: #1b5e20; }
+      .status-cancelled { background: #c62828; }
+
+      .summary-grid {
+        display: grid;
+        gap: 10px;
+      }
+      .line {
+        display: flex;
+        justify-content: space-between;
+        gap: 12px;
+        border-bottom: 1px solid var(--border);
+        padding: 10px 0;
+      }
+      .line:last-child {
+        border-bottom: none;
+      }
+      .stack {
+        display: grid;
+        gap: 8px;
+      }
+      .order-ok {
+        margin-top: 0;
+      }
+    </style>
   </head>
   <body>
     <div id="header-root"></div>
     <main>
-      <div class="container">
-        <h1 class="section-title">Статус оплаты</h1>
+      <div class="container stack">
         <section class="panel">
-          <p id="payment-status"></p>
-          <p id="payment-detail" class="muted"></p>
+          <h1 class="section-title order-ok">✅ Заказ принят!</h1>
+          <p class="muted" id="order-meta">Загружаем данные заказа...</p>
+          <p>
+            <span class="muted">Статус доставки:</span>
+            <span id="delivery-status" class="status-badge status-new">Новый</span>
+          </p>
+        </section>
+
+        <section class="panel">
+          <h3>Данные получателя</h3>
+          <div class="summary-grid">
+            <div class="line"><span class="muted">Имя</span><strong id="customer-name">—</strong></div>
+            <div class="line"><span class="muted">Телефон</span><strong id="customer-phone">—</strong></div>
+            <div class="line"><span class="muted">Адрес</span><strong id="customer-address">—</strong></div>
+            <div class="line"><span class="muted">Комментарий</span><strong id="customer-comment">—</strong></div>
+          </div>
+        </section>
+
+        <section class="panel">
+          <h3>Состав заказа</h3>
+          <div id="items-list" class="summary-grid"></div>
+          <div class="line">
+            <span class="muted">Итоговая сумма</span>
+            <strong id="order-total">0 ₽</strong>
+          </div>
           <div class="actions">
             <a class="btn primary" href="catalog.html">В каталог</a>
             <a class="btn" href="contacts.html">Контакты</a>
@@ -26,6 +87,91 @@
     <script src="assets/js/products.js"></script>
     <script src="assets/js/cart.js"></script>
     <script src="assets/js/layout.js"></script>
-    <script src="assets/js/payment-success.js"></script>
+    <script>
+      function formatRub(value) {
+        return new Intl.NumberFormat("ru-RU").format(Number(value || 0)) + " ₽";
+      }
+
+      function formatDate(iso) {
+        const date = new Date(iso);
+        if (Number.isNaN(date.getTime())) return "—";
+        return new Intl.DateTimeFormat("ru-RU", {
+          dateStyle: "medium",
+          timeStyle: "short"
+        }).format(date);
+      }
+
+      function statusView(deliveryStatus) {
+        const map = {
+          new: { label: "Новый", cls: "status-new" },
+          preparing: { label: "Готовится", cls: "status-preparing" },
+          ready: { label: "Готов", cls: "status-ready" },
+          delivering: { label: "Доставляется", cls: "status-delivering" },
+          done: { label: "Завершён", cls: "status-done" },
+          cancelled: { label: "Отменён", cls: "status-cancelled" }
+        };
+        return map[deliveryStatus] || { label: String(deliveryStatus || "Новый"), cls: "status-new" };
+      }
+
+      async function loadOrder() {
+        const params = new URLSearchParams(window.location.search);
+        const orderId = params.get("orderId");
+        const metaEl = document.getElementById("order-meta");
+        const statusEl = document.getElementById("delivery-status");
+
+        if (!orderId) {
+          metaEl.textContent = "Не указан orderId в URL.";
+          statusEl.textContent = "Неизвестно";
+          return;
+        }
+
+        try {
+          const response = await fetch("/api/orders/" + encodeURIComponent(orderId));
+          const data = await response.json();
+          if (!response.ok || !data.ok) {
+            metaEl.textContent = data.message || "Не удалось получить заказ.";
+            statusEl.textContent = "Не найден";
+            statusEl.className = "status-badge status-cancelled";
+            return;
+          }
+
+          metaEl.textContent = "Номер заказа: " + data.orderId + " · Дата оформления: " + formatDate(data.createdAt);
+
+          const status = statusView(data.deliveryStatus);
+          statusEl.textContent = status.label;
+          statusEl.className = "status-badge " + status.cls;
+
+          document.getElementById("customer-name").textContent = data.customer?.name || "—";
+          document.getElementById("customer-phone").textContent = data.customer?.phone || "—";
+          document.getElementById("customer-address").textContent = data.customer?.address || "—";
+          document.getElementById("customer-comment").textContent = data.customer?.comment || "—";
+
+          const itemsRoot = document.getElementById("items-list");
+          itemsRoot.innerHTML = "";
+          const items = Array.isArray(data.items) ? data.items : [];
+          for (const item of items) {
+            const row = document.createElement("div");
+            row.className = "line";
+            row.innerHTML =
+              "<span>" +
+              (item.name || "Товар") +
+              " x " +
+              Number(item.quantity || 0) +
+              "</span><strong>" +
+              formatRub(item.lineTotal || Number(item.price || 0) * Number(item.quantity || 0)) +
+              "</strong>";
+            itemsRoot.appendChild(row);
+          }
+
+          document.getElementById("order-total").textContent = formatRub(data.total);
+        } catch (_e) {
+          metaEl.textContent = "Не удалось связаться с сервером.";
+          statusEl.textContent = "Ошибка";
+          statusEl.className = "status-badge status-cancelled";
+        }
+      }
+
+      document.addEventListener("DOMContentLoaded", loadOrder);
+    </script>
   </body>
 </html>

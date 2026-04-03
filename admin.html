@@ -4,18 +4,10 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="robots" content="noindex, nofollow" />
-    <title>Каталог — редактирование</title>
+    <title>Админ-панель</title>
     <script src="assets/js/theme-init.js"></script>
     <link rel="stylesheet" href="assets/css/styles.css" />
     <style>
-      .admin-textarea {
-        width: 100%;
-        min-height: 420px;
-        font-family: ui-monospace, Consolas, monospace;
-        font-size: 0.85rem;
-        line-height: 1.45;
-        margin-top: 12px;
-      }
       .admin-toolbar {
         display: flex;
         flex-wrap: wrap;
@@ -28,65 +20,180 @@
         min-width: 200px;
         max-width: 360px;
       }
-      .admin-instruction {
-        background: color-mix(in srgb, var(--green) 6%, var(--surface));
-        border: 1px solid var(--border);
-        border-radius: var(--radius, 14px);
-        padding: 18px 20px;
-        margin-bottom: 18px;
+      .tabs {
+        display: flex;
+        gap: 10px;
+        margin: 14px 0;
       }
-      .admin-instruction h2 {
-        margin: 0 0 12px;
-        font-family: var(--font-display);
-        font-size: 1.25rem;
+      .tab-content {
+        display: none;
       }
-      .admin-steps {
-        margin: 0;
-        padding-left: 1.25rem;
+      .tab-content.active {
+        display: block;
       }
-      .admin-steps li {
-        margin-bottom: 10px;
+      .orders-list {
+        display: grid;
+        gap: 14px;
       }
-      .admin-steps li:last-child {
-        margin-bottom: 0;
+      .order-card {
+        display: grid;
+        gap: 8px;
       }
-      .admin-details {
-        margin-top: 14px;
-        border-top: 1px solid var(--border);
-        padding-top: 12px;
+      .order-row {
+        border-bottom: 1px solid var(--border);
+        padding: 8px 0;
       }
-      .admin-details summary {
-        cursor: pointer;
+      .order-row:last-child {
+        border-bottom: none;
+      }
+      .inline {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        flex-wrap: wrap;
+      }
+      .saved-note {
+        color: #2e7d32;
         font-weight: 600;
-        color: var(--green);
       }
-      .admin-details[open] summary {
-        margin-bottom: 8px;
+      .catalog-table-wrap {
+        width: 100%;
+        overflow-x: auto;
       }
-      .admin-field-table {
+      .catalog-table {
         width: 100%;
         border-collapse: collapse;
-        font-size: 0.92rem;
-        margin-top: 8px;
+        min-width: 760px;
       }
-      .admin-field-table th,
-      .admin-field-table td {
-        border: 1px solid var(--border);
-        padding: 8px 10px;
+      .catalog-table th,
+      .catalog-table td {
+        border-bottom: 1px solid var(--border);
+        padding: 8px;
         text-align: left;
-        vertical-align: top;
+        vertical-align: middle;
       }
-      .admin-field-table th {
-        background: color-mix(in srgb, var(--brown) 5%, var(--surface));
+      .catalog-table th {
+        font-weight: 700;
+      }
+      .catalog-table input {
+        min-width: 120px;
+      }
+      .catalog-table .thumb {
+        width: 60px;
+        height: 60px;
+        border-radius: 8px;
+        object-fit: cover;
+        border: 1px solid var(--border);
+        background: color-mix(in srgb, var(--muted) 10%, #fff);
+      }
+      .photo-picker {
+        width: 60px;
+        height: 60px;
+        position: relative;
+        border-radius: 8px;
+        overflow: hidden;
+        border: 1px solid var(--border);
+        background: color-mix(in srgb, var(--muted) 12%, #fff);
+        cursor: pointer;
+      }
+      .photo-picker .thumb {
+        border: 0;
+        display: block;
+      }
+      .photo-picker .photo-empty {
+        width: 60px;
+        height: 60px;
+        display: grid;
+        place-items: center;
+        color: var(--muted);
+        font-size: 1.6rem;
+        line-height: 1;
+      }
+      .photo-picker .photo-overlay {
+        position: absolute;
+        inset: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: rgba(0, 0, 0, 0.55);
+        color: #fff;
+        font-size: 0.72rem;
         font-weight: 600;
+        opacity: 0;
+        transition: opacity 0.15s ease;
+        text-align: center;
+        padding: 4px;
       }
-      .admin-warning {
+      .photo-picker:hover .photo-overlay {
+        opacity: 1;
+      }
+      .photo-picker.uploading .photo-overlay {
+        opacity: 1;
+        background: rgba(0, 0, 0, 0.7);
+        font-size: 0.7rem;
+      }
+      .photo-picker.uploading .photo-overlay::after {
+        content: "";
+        width: 14px;
+        height: 14px;
+        border: 2px solid rgba(255, 255, 255, 0.45);
+        border-top-color: #fff;
+        border-radius: 50%;
+        margin-left: 6px;
+        animation: spin 0.8s linear infinite;
+      }
+      @keyframes spin {
+        from {
+          transform: rotate(0deg);
+        }
+        to {
+          transform: rotate(360deg);
+        }
+      }
+      .visually-hidden {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        padding: 0;
+        margin: -1px;
+        overflow: hidden;
+        clip: rect(0, 0, 0, 0);
+        border: 0;
+      }
+      .catalog-actions {
         margin-top: 12px;
-        padding: 10px 12px;
-        border-radius: 10px;
-        background: color-mix(in srgb, #b71c1c 8%, var(--surface));
-        border: 1px solid color-mix(in srgb, #b71c1c 25%, var(--border));
-        font-size: 0.92rem;
+      }
+      @media (max-width: 700px) {
+        .catalog-table,
+        .catalog-table thead,
+        .catalog-table tbody,
+        .catalog-table tr,
+        .catalog-table td {
+          display: block;
+          width: 100%;
+          min-width: 0;
+        }
+        .catalog-table thead {
+          display: none;
+        }
+        .catalog-table tr {
+          border: 1px solid var(--border);
+          border-radius: var(--radius);
+          padding: 10px;
+          margin-bottom: 12px;
+          background: var(--surface);
+        }
+        .catalog-table td {
+          border: 0;
+          padding: 6px 0;
+        }
+        .catalog-table td::before {
+          content: attr(data-label);
+          display: block;
+          font-size: 0.82rem;
+          color: var(--muted);
+          margin-bottom: 4px;
+        }
       }
     </style>
   </head>
@@ -94,111 +201,9 @@
     <div id="header-root"></div>
     <main>
       <div class="container">
-        <h1 class="section-title">Редактирование каталога</h1>
-
-        <section class="admin-instruction" aria-labelledby="admin-start-title">
-          <h2 id="admin-start-title">С чего начать (коротко)</h2>
-          <ol class="admin-steps">
-            <li>
-              <strong>Получите секретный ключ</strong> у того, кто настраивал сайт (разработчик / администратор). Сам ключ
-              прописывается на сервере в файле настроек, обычно это не ваш уровень — просто попросите готовый ключ.
-            </li>
-            <li>
-              <strong>Откройте эту страницу</strong> в браузере (закладку вам дадут или пришлют ссылку вида
-              <code>…/admin.html</code>).
-            </li>
-            <li>
-              Вставьте ключ в поле ниже и нажмите <strong>«Загрузить с сервера»</strong> — подгрузится текущий список
-              блюд.
-            </li>
-            <li>
-              <strong>Чтобы добавить блюдо:</strong> в большом поле найдите блок одного товара (между <code>{</code> и
-              <code>}</code>), скопируйте его целиком, вставьте копию ниже через запятую. В копии поменяйте
-              <code>id</code> (уникальный, например <code>p15</code>), <code>name</code>, <code>price</code>,
-              <code>unit</code>, при необходимости ссылку на фото <code>image</code>.
-            </li>
-            <li>
-              Нажмите <strong>«Сохранить»</strong>, затем откройте
-              <a href="catalog.html">витрину каталога</a> и обновите страницу (F5), чтобы увидеть изменения.
-            </li>
-          </ol>
-
-          <div class="admin-details">
-            <details>
-              <summary>Шпаргалка: что значит каждое поле</summary>
-              <table class="admin-field-table">
-                <thead>
-                  <tr>
-                    <th>Поле</th>
-                    <th>Обязательно?</th>
-                    <th>Что писать</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr>
-                    <td><code>id</code></td>
-                    <td>да</td>
-                    <td>Уникальный код латиницей, без пробелов, например <code>p15</code>. Для каждого блюда свой.</td>
-                  </tr>
-                  <tr>
-                    <td><code>name</code></td>
-                    <td>да</td>
-                    <td>Название на сайте, как увидит покупатель.</td>
-                  </tr>
-                  <tr>
-                    <td><code>price</code></td>
-                    <td>да</td>
-                    <td>Цена числом, без «₽», например <code>450</code>.</td>
-                  </tr>
-                  <tr>
-                    <td><code>unit</code></td>
-                    <td>да</td>
-                    <td>Как считается цена: <code>6 шт</code>, <code>за 1 кг</code> и т.д.</td>
-                  </tr>
-                  <tr>
-                    <td><code>image</code></td>
-                    <td>желательно</td>
-                    <td>Ссылка на картинку в интернете. Если не уверены — попросите разработчика залить фото и дать ссылку.</td>
-                  </tr>
-                  <tr>
-                    <td><code>category</code></td>
-                    <td>нет</td>
-                    <td>Группа для себя, на сайте можно использовать позже. Например «Блины».</td>
-                  </tr>
-                  <tr>
-                    <td><code>description</code></td>
-                    <td>нет</td>
-                    <td>Короткое описание под названием.</td>
-                  </tr>
-                </tbody>
-              </table>
-            </details>
-          </div>
-
-          <div class="admin-details">
-            <details>
-              <summary>Если не сохраняется или «неверный ключ»</summary>
-              <ul class="admin-steps" style="list-style: disc; padding-left: 1.25rem">
-                <li>Проверьте, что ключ скопирован полностью, без пробела в начале или конце.</li>
-                <li>Убедитесь, что сайт запущен на сервере (без этого кнопка «Сохранить» не сработает).</li>
-                <li>Если пишет про JSON — где-то лишняя или пропущенная запятая/кавычка; сравните с соседними блоками.</li>
-                <li>В спорном случае пришлите разработчику текст из поля или скрин ошибки.</li>
-              </ul>
-            </details>
-          </div>
-
-          <p class="admin-warning">
-            <strong>Важно:</strong> не удаляйте кавычки <code>"</code> и запятые между блоками. Перед большими правками
-            скопируйте весь текст в «Блокнот» — так будет запасная копия.
-          </p>
-        </section>
+        <h1 class="section-title">Админ-панель</h1>
 
         <section class="panel">
-          <p class="muted">
-            Ниже — технический формат (JSON): один каталог и для витрины, и для приёма заказов. Ключ
-            <code>CATALOG_ADMIN_TOKEN</code> задаётся на сервере в файле <code>.env</code> — его настраивает
-            администратор сайта.
-          </p>
           <div class="admin-toolbar">
             <input
               type="password"
@@ -207,22 +212,473 @@
               placeholder="Секретный ключ"
               aria-label="Секретный ключ"
             />
-            <button type="button" class="btn" id="btn-load">Загрузить с сервера</button>
+            <button type="button" class="btn primary" id="btn-login">Войти</button>
+          </div>
+          <p id="admin-msg" class="muted"></p>
+        </section>
+
+        <div class="tabs">
+          <button type="button" class="btn primary" id="tab-orders">Заказы</button>
+          <button type="button" class="btn" id="tab-catalog">Каталог</button>
+        </div>
+
+        <section class="panel tab-content active" id="orders-tab-content">
+          <div class="actions" style="margin-top: 0">
+            <button type="button" class="btn" id="btn-orders-refresh">Обновить</button>
+          </div>
+          <p id="orders-msg" class="muted"></p>
+          <div id="orders-list" class="orders-list"></div>
+        </section>
+
+        <section class="panel tab-content" id="catalog-tab-content">
+          <div class="admin-toolbar">
+            <button type="button" class="btn" id="btn-load">Загрузить</button>
             <button type="button" class="btn primary" id="btn-save">Сохранить</button>
           </div>
-          <textarea
-            id="catalog-json"
-            class="admin-textarea"
-            spellcheck="false"
-            aria-label="JSON каталога"
-          ></textarea>
-          <p id="admin-msg" class="muted"></p>
+          <div class="catalog-table-wrap">
+            <table class="catalog-table" id="catalog-table">
+              <thead>
+                <tr>
+                  <th>Фото</th>
+                  <th>Название</th>
+                  <th>Цена (₽)</th>
+                  <th>Единица (шт/кг)</th>
+                  <th>Описание</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody id="catalog-body"></tbody>
+            </table>
+          </div>
+          <div class="catalog-actions">
+            <button type="button" class="btn" id="btn-add-product">Добавить товар</button>
+          </div>
+          <p id="catalog-msg" class="muted"></p>
         </section>
       </div>
     </main>
     <div id="footer-root"></div>
     <script src="assets/js/cart.js"></script>
     <script src="assets/js/layout.js"></script>
-    <script src="assets/js/admin.js"></script>
+    <script>
+      const TOKEN_KEY = "catalogAdminToken";
+      const STATUS_OPTIONS = ["new", "preparing", "ready", "delivering", "done", "cancelled"];
+
+      function getToken() {
+        return String(document.getElementById("admin-token").value || "").trim();
+      }
+
+      function setMainMessage(text, isError) {
+        const el = document.getElementById("admin-msg");
+        el.textContent = text || "";
+        el.style.color = isError ? "#b71c1c" : "var(--muted, #666)";
+      }
+
+      function setCatalogMessage(text, isError) {
+        const el = document.getElementById("catalog-msg");
+        el.textContent = text || "";
+        el.style.color = isError ? "#b71c1c" : "var(--muted, #666)";
+      }
+
+      function setOrdersMessage(text, isError) {
+        const el = document.getElementById("orders-msg");
+        el.textContent = text || "";
+        el.style.color = isError ? "#b71c1c" : "var(--muted, #666)";
+      }
+
+      function requireToken() {
+        const token = getToken();
+        if (!token) {
+          setMainMessage("Введите секретный ключ и нажмите «Войти».", true);
+          return null;
+        }
+        return token;
+      }
+
+      function formatDate(iso) {
+        const d = new Date(iso);
+        if (Number.isNaN(d.getTime())) return "—";
+        return new Intl.DateTimeFormat("ru-RU", { dateStyle: "medium", timeStyle: "short" }).format(d);
+      }
+
+      function formatRub(value) {
+        return new Intl.NumberFormat("ru-RU").format(Number(value || 0)) + " ₽";
+      }
+
+      function escapeAttr(value) {
+        return String(value || "")
+          .replaceAll("&", "&amp;")
+          .replaceAll('"', "&quot;")
+          .replaceAll("<", "&lt;")
+          .replaceAll(">", "&gt;");
+      }
+
+      async function login() {
+        const token = getToken();
+        if (!token) {
+          setMainMessage("Введите секретный ключ.", true);
+          return;
+        }
+        sessionStorage.setItem(TOKEN_KEY, token);
+        setMainMessage("Ключ сохранён в сессии.");
+      }
+
+      async function loadCatalog() {
+        setCatalogMessage("");
+        try {
+          const res = await fetch("/api/catalog");
+          const data = await res.json();
+          if (!res.ok) {
+            throw new Error(data.message || "Ошибка загрузки");
+          }
+          const products = Array.isArray(data) ? data : data.products || [];
+          renderCatalogTable(products);
+          setCatalogMessage("Каталог загружен.");
+        } catch (e) {
+          setCatalogMessage(e instanceof Error ? e.message : String(e), true);
+        }
+      }
+
+      function buildCatalogRow(product) {
+        const tr = document.createElement("tr");
+        const p = product || {};
+        const safeId = escapeAttr(String(p.id || ""));
+        const safeImage = escapeAttr(String(p.image || ""));
+        const safeName = escapeAttr(String(p.name || ""));
+        const safePrice = Number.isFinite(Number(p.price)) ? String(Number(p.price)) : "";
+        const safeUnit = escapeAttr(String(p.unit || ""));
+        const safeDescription = escapeAttr(String(p.description || ""));
+
+        tr.innerHTML =
+          "<td data-label='Фото'>" +
+          "<div class='photo-picker' title='Сменить фото'>" +
+          "<div class='photo-media'>" +
+          (safeImage
+            ? "<img class='thumb' alt='Фото товара' src='" + safeImage + "'>"
+            : "<div class='photo-empty'>+</div>") +
+          "</div>" +
+          "<div class='photo-overlay'>Сменить фото</div>" +
+          "<input type='file' class='visually-hidden product-image-file' accept='image/*'>" +
+          "</div>" +
+          "<input type='hidden' class='product-image-url' value='" +
+          safeImage +
+          "'>" +
+          "<input type='hidden' class='product-id' value='" +
+          safeId +
+          "'>" +
+          "</td>" +
+          "<td data-label='Название'><input type='text' class='product-name' value='" +
+          safeName +
+          "'></td>" +
+          "<td data-label='Цена (₽)'><input type='number' min='0' class='product-price' value='" +
+          safePrice +
+          "'></td>" +
+          "<td data-label='Единица (шт/кг)'><input type='text' class='product-unit' value='" +
+          safeUnit +
+          "'></td>" +
+          "<td data-label='Описание'><input type='text' class='product-description' value='" +
+          safeDescription +
+          "'></td>" +
+          "<td data-label='Удалить'><button type='button' class='btn product-remove'>Удалить</button></td>";
+
+        const picker = tr.querySelector(".photo-picker");
+        const fileInput = tr.querySelector(".product-image-file");
+        const imageUrlInput = tr.querySelector(".product-image-url");
+        const media = tr.querySelector(".photo-media");
+        const overlay = tr.querySelector(".photo-overlay");
+
+        function setPickerImage(url) {
+          if (url) {
+            media.innerHTML = "<img class='thumb' alt='Фото товара' src='" + escapeAttr(url) + "'>";
+          } else {
+            media.innerHTML = "<div class='photo-empty'>+</div>";
+          }
+        }
+
+        picker.addEventListener("click", function () {
+          fileInput.click();
+        });
+
+        fileInput.addEventListener("change", async function () {
+          const file = fileInput.files && fileInput.files[0];
+          if (!file) return;
+          const token = requireToken();
+          if (!token) return;
+
+          picker.classList.add("uploading");
+          overlay.textContent = "Загрузка...";
+          try {
+            const formData = new FormData();
+            formData.append("image", file);
+            const res = await fetch("/api/upload", {
+              method: "POST",
+              headers: {
+                Authorization: "Bearer " + token
+              },
+              body: formData
+            });
+            const data = await res.json().catch(() => ({}));
+            if (!res.ok || !data.ok || !data.url) {
+              throw new Error(data.message || "Ошибка загрузки изображения");
+            }
+            imageUrlInput.value = data.url;
+            setPickerImage(data.url);
+            setCatalogMessage("Фото загружено.");
+          } catch (e) {
+            setCatalogMessage(e instanceof Error ? e.message : String(e), true);
+          } finally {
+            picker.classList.remove("uploading");
+            overlay.textContent = "Сменить фото";
+            fileInput.value = "";
+          }
+        });
+
+        tr.querySelector(".product-remove").addEventListener("click", function () {
+          if (confirm("Удалить товар из таблицы?")) {
+            tr.remove();
+          }
+        });
+
+        return tr;
+      }
+
+      function renderCatalogTable(products) {
+        const body = document.getElementById("catalog-body");
+        body.innerHTML = "";
+        for (const product of products) {
+          body.appendChild(buildCatalogRow(product));
+        }
+      }
+
+      function collectCatalogProducts() {
+        const rows = Array.from(document.querySelectorAll("#catalog-body tr"));
+        return rows.map(function (row, index) {
+          const idRaw = row.querySelector(".product-id").value.trim();
+          const name = row.querySelector(".product-name").value.trim();
+          const priceRaw = row.querySelector(".product-price").value;
+          const unit = row.querySelector(".product-unit").value.trim();
+          const description = row.querySelector(".product-description").value.trim();
+          const image = row.querySelector(".product-image-url").value.trim();
+
+          const generatedId = "p" + String(index + 1);
+          const product = {
+            id: idRaw || generatedId,
+            name,
+            price: Number(priceRaw || 0),
+            unit
+          };
+
+          if (description) product.description = description;
+          if (image) product.image = image;
+          return product;
+        });
+      }
+
+      async function saveCatalog() {
+        setCatalogMessage("");
+        const token = requireToken();
+        if (!token) return;
+
+        const products = collectCatalogProducts();
+        const body = { products };
+
+        try {
+          const res = await fetch("/api/admin/catalog", {
+            method: "PUT",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: "Bearer " + token
+            },
+            body: JSON.stringify(body)
+          });
+          const data = await res.json().catch(() => ({}));
+          if (!res.ok) {
+            const msg = Array.isArray(data.errors) ? data.errors.join(" ") : data.message || "Ошибка сохранения";
+            throw new Error(msg);
+          }
+          setCatalogMessage("Сохранено.");
+          window.__productsPromise = null;
+        } catch (e) {
+          setCatalogMessage(e instanceof Error ? e.message : String(e), true);
+        }
+      }
+
+      function renderOrders(orders) {
+        const root = document.getElementById("orders-list");
+        root.innerHTML = "";
+
+        if (!orders.length) {
+          root.innerHTML = '<p class="muted">Заказов пока нет.</p>';
+          return;
+        }
+
+        for (const order of orders) {
+          const card = document.createElement("article");
+          card.className = "panel order-card";
+
+          const header = document.createElement("div");
+          header.className = "order-row";
+          header.innerHTML =
+            "<strong>" +
+            (order.orderId || "—") +
+            "</strong><br><span class='muted'>Дата: " +
+            formatDate(order.createdAt) +
+            "</span>";
+          card.appendChild(header);
+
+          const customer = document.createElement("div");
+          customer.className = "order-row";
+          customer.innerHTML =
+            "<strong>Клиент</strong><br>" +
+            (order.customer?.name || "—") +
+            " · " +
+            (order.customer?.phone || "—") +
+            "<br><span class='muted'>" +
+            (order.customer?.address || "—") +
+            "</span>";
+          card.appendChild(customer);
+
+          const items = document.createElement("div");
+          items.className = "order-row";
+          const itemLines = (Array.isArray(order.items) ? order.items : [])
+            .map(function (item) {
+              return (
+                "<div>" +
+                (item.name || "Товар") +
+                " x " +
+                Number(item.quantity || 0) +
+                " — <strong>" +
+                formatRub(item.lineTotal || Number(item.price || 0) * Number(item.quantity || 0)) +
+                "</strong></div>"
+              );
+            })
+            .join("");
+          items.innerHTML = "<strong>Состав заказа</strong><br>" + itemLines;
+          card.appendChild(items);
+
+          const total = document.createElement("div");
+          total.className = "order-row";
+          total.innerHTML = "<strong>Итог: " + formatRub(order.total) + "</strong>";
+          card.appendChild(total);
+
+          const statusRow = document.createElement("div");
+          statusRow.className = "inline";
+
+          const label = document.createElement("span");
+          label.className = "muted";
+          label.textContent = "Статус:";
+
+          const select = document.createElement("select");
+          for (const status of STATUS_OPTIONS) {
+            const option = document.createElement("option");
+            option.value = status;
+            option.textContent = status;
+            if ((order.deliveryStatus || "new") === status) option.selected = true;
+            select.appendChild(option);
+          }
+
+          const savedNote = document.createElement("span");
+          savedNote.className = "saved-note";
+
+          select.addEventListener("change", async function () {
+            const token = requireToken();
+            if (!token) return;
+            savedNote.textContent = "";
+            try {
+              const res = await fetch("/api/admin/orders/" + encodeURIComponent(order.orderId) + "/status", {
+                method: "PATCH",
+                headers: {
+                  "Content-Type": "application/json",
+                  Authorization: "Bearer " + token
+                },
+                body: JSON.stringify({ deliveryStatus: select.value })
+              });
+              const data = await res.json().catch(() => ({}));
+              if (!res.ok || !data.ok) {
+                throw new Error(data.message || "Ошибка изменения статуса");
+              }
+              savedNote.textContent = "Сохранено!";
+              setTimeout(function () {
+                savedNote.textContent = "";
+              }, 2000);
+            } catch (e) {
+              setOrdersMessage(e instanceof Error ? e.message : String(e), true);
+            }
+          });
+
+          statusRow.appendChild(label);
+          statusRow.appendChild(select);
+          statusRow.appendChild(savedNote);
+          card.appendChild(statusRow);
+
+          root.appendChild(card);
+        }
+      }
+
+      async function refreshOrders() {
+        setOrdersMessage("");
+        const token = requireToken();
+        if (!token) return;
+
+        try {
+          const res = await fetch("/api/admin/orders", {
+            headers: { Authorization: "Bearer " + token }
+          });
+          const data = await res.json().catch(() => ({}));
+          if (!res.ok || !data.ok) {
+            throw new Error(data.message || "Не удалось загрузить заказы");
+          }
+          renderOrders(Array.isArray(data.orders) ? data.orders : []);
+          setOrdersMessage("Заказы обновлены.");
+        } catch (e) {
+          setOrdersMessage(e instanceof Error ? e.message : String(e), true);
+        }
+      }
+
+      function activateTab(tab) {
+        const ordersBtn = document.getElementById("tab-orders");
+        const catalogBtn = document.getElementById("tab-catalog");
+        const ordersContent = document.getElementById("orders-tab-content");
+        const catalogContent = document.getElementById("catalog-tab-content");
+
+        if (tab === "orders") {
+          ordersContent.style.display = "block";
+          catalogContent.style.display = "none";
+          ordersBtn.className = "btn primary";
+          catalogBtn.className = "btn";
+          return;
+        }
+
+        ordersContent.style.display = "none";
+        catalogContent.style.display = "block";
+        ordersBtn.className = "btn";
+        catalogBtn.className = "btn primary";
+      }
+
+      document.addEventListener("DOMContentLoaded", function () {
+        const saved = sessionStorage.getItem(TOKEN_KEY);
+        if (saved) {
+          document.getElementById("admin-token").value = saved;
+          setMainMessage("Ключ восстановлен из сессии.");
+        }
+
+        document.getElementById("btn-login").addEventListener("click", login);
+        document.getElementById("btn-load").addEventListener("click", loadCatalog);
+        document.getElementById("btn-save").addEventListener("click", saveCatalog);
+        document.getElementById("btn-add-product").addEventListener("click", function () {
+          document.getElementById("catalog-body").appendChild(buildCatalogRow({}));
+        });
+        document.getElementById("btn-orders-refresh").addEventListener("click", refreshOrders);
+        document.getElementById("tab-orders").addEventListener("click", function () {
+          activateTab("orders");
+        });
+        document.getElementById("tab-catalog").addEventListener("click", function () {
+          activateTab("catalog");
+        });
+
+        activateTab("orders");
+        loadCatalog();
+      });
+    </script>
   </body>
 </html>

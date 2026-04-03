@@ -4,6 +4,7 @@ const crypto = require("crypto");
 const express = require("express");
 const cors = require("cors");
 const dotenv = require("dotenv");
+const multer = require("multer");
 
 dotenv.config();
 
@@ -12,10 +13,23 @@ const PORT = Number(process.env.PORT || 3000);
 const PUBLIC_BASE_URL = (process.env.PUBLIC_BASE_URL || `http://localhost:${PORT}`).replace(/\/$/, "");
 const CATALOG_PATH = path.join(__dirname, "data", "catalog.json");
 const ORDERS_PATH = path.join(__dirname, "data", "orders.json");
+const UPLOADS_DIR = path.join(__dirname, "uploads");
+
+const upload = multer({
+  limits: { fileSize: 5 * 1024 * 1024 },
+  storage: multer.diskStorage({
+    destination: (_req, _file, cb) => cb(null, UPLOADS_DIR),
+    filename: (_req, file, cb) => {
+      const ext = path.extname(file.originalname || "").toLowerCase() || ".bin";
+      cb(null, `${Date.now()}${ext}`);
+    }
+  })
+});
 
 app.use(cors());
 app.use(express.json({ limit: "1mb" }));
 app.use(express.static(path.join(__dirname)));
+app.use("/uploads", express.static(UPLOADS_DIR));
 
 function getCatalogSync() {
   try {
@@ -180,6 +194,22 @@ app.patch("/api/admin/orders/:orderId/status", async (req, res) => {
   return res.json({ ok: true, orderId, deliveryStatus });
 });
 
+app.post("/api/upload", (req, res) => {
+  if (!checkAdminAuth(req, res)) return;
+  upload.single("image")(req, res, (err) => {
+    if (err && err.code === "LIMIT_FILE_SIZE") {
+      return res.status(400).json({ ok: false, message: "Файл слишком большой. Максимум 5MB." });
+    }
+    if (err) {
+      return res.status(400).json({ ok: false, message: "Ошибка загрузки файла." });
+    }
+    if (!req.file) {
+      return res.status(400).json({ ok: false, message: "Файл image не передан." });
+    }
+    return res.json({ ok: true, url: `/uploads/${req.file.filename}` });
+  });
+});
+
 app.get("/api/health", (_req, res) => {
   res.json({ ok: true, service: "workForWeb-order-api" });
 });
@@ -202,6 +232,10 @@ app.get("/api/orders/:orderId", async (req, res) => {
   return res.json({
     ok: true,
     orderId: order.orderId,
+    createdAt: order.createdAt,
+    deliveryStatus: order.deliveryStatus || "new",
+    customer: order.customer,
+    items: Array.isArray(order.items) ? order.items : [],
     total: order.total,
     paymentStatus: order.paymentStatus
   });
@@ -532,6 +566,7 @@ async function notifyIfPaymentSucceeded(order) {
 }
 
 ensureOrdersFile();
+fs.mkdirSync(UPLOADS_DIR, { recursive: true });
 
 app.listen(PORT, () => {
   // eslint-disable-next-line no-console
