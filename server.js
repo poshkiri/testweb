@@ -588,6 +588,10 @@ async function notifyIfPaymentSucceeded(order) {
 ensureOrdersFile();
 fs.mkdirSync(UPLOADS_DIR, { recursive: true });
 
+app.use((req, res) => {
+  res.status(404).sendFile(path.join(__dirname, "404.html"));
+});
+
 app.listen(PORT, () => {
   // eslint-disable-next-line no-console
   console.log(`Server running on http://localhost:${PORT}`);
