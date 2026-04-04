@@ -481,22 +481,34 @@ async function syncOrderPaymentFromYooKassa(order) {
 }
 
 async function sendTelegramNotification(order) {
-  const orderLines = order.items
-    .map((item) => `- ${item.name} x ${item.quantity} = ${item.lineTotal} ₽`)
+  const dateRu = new Date().toLocaleString("ru-RU", { timeZone: "Europe/Moscow" });
+  const dateLine = dateRu.includes(",") ? dateRu.replace(", ", " в ") : dateRu;
+
+  const commentRaw = order.customer?.comment;
+  const commentLine =
+    commentRaw != null && String(commentRaw).trim()
+      ? `💬 Комментарий: ${String(commentRaw).trim()}`
+      : "";
+
+  const orderLines = (order.items || [])
+    .map((item) => `• ${item.name} × ${item.quantity} = ${item.lineTotal} ₽`)
     .join("\n");
 
   const message = [
-    `Новый заказ ${order.orderId}`,
+    `🛒 НОВЫЙ ЗАКАЗ #${order.orderId}`,
+    `📅 ${dateLine}`,
+    "",
+    "👤 КЛИЕНТ",
     `Имя: ${order.customer.name}`,
     `Телефон: ${order.customer.phone}`,
     `Адрес: ${order.customer.address}`,
     `Связь: ${order.customer.contactMethod}`,
-    `Комментарий: ${order.customer.comment || "-"}`,
+    ...(commentLine ? [commentLine] : []),
     "",
-    "Состав заказа:",
+    "🧾 СОСТАВ ЗАКАЗА",
     orderLines,
     "",
-    `Итого: ${order.total} ₽`
+    `💰 ИТОГО: ${order.total} ₽`
   ].join("\n");
 
   return sendTelegramMessage(message);
