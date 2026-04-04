@@ -13,8 +13,22 @@
       <div class="container">
         <h1 class="section-title">Корзина</h1>
         <section class="panel">
-          <div id="cart-list" class="cart-list"></div>
-          <div id="cart-summary"></div>
+          <div id="cart-empty-state" class="cart-empty-state" aria-hidden="true">
+            <div class="cart-empty-state__icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="9" cy="21" r="1" />
+                <circle cx="20" cy="21" r="1" />
+                <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6" />
+              </svg>
+            </div>
+            <p class="cart-empty-state__title">Корзина пуста</p>
+            <p class="muted">Добавьте товары из каталога — они появятся здесь.</p>
+            <a class="btn primary" href="/catalog">Перейти в каталог</a>
+          </div>
+          <div id="cart-filled" class="cart-filled">
+            <div id="cart-list" class="cart-list"></div>
+            <div id="cart-summary"></div>
+          </div>
         </section>
       </div>
     </main>
@@ -28,11 +42,21 @@
         const summary = document.getElementById("cart-summary");
         const items = window.CartStore.getCartDetailedItems();
 
+        const emptyState = document.getElementById("cart-empty-state");
+        const filled = document.getElementById("cart-filled");
+
         if (!items.length) {
-          list.innerHTML = "<p class='muted'>Корзина пока пустая.</p>";
-          summary.innerHTML = "<a class='btn primary' href='/catalog'>Выбрать товары</a>";
+          list.innerHTML = "";
+          summary.innerHTML = "";
+          emptyState.classList.add("is-visible");
+          emptyState.setAttribute("aria-hidden", "false");
+          filled.classList.add("is-hidden");
           return;
         }
+
+        emptyState.classList.remove("is-visible");
+        emptyState.setAttribute("aria-hidden", "true");
+        filled.classList.remove("is-hidden");
 
         list.innerHTML = items.map(
           (item) => `

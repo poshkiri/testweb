@@ -59,6 +59,8 @@
           var img = window.escapeHtml(p.image || "");
           var id = window.escapeHtml(p.id);
           var unit = window.escapeHtml(p.unit || "");
+          var qtyInCart = window.CartStore.getCartQuantity(p.id);
+          var btnLabel = qtyInCart > 0 ? "В корзине (" + qtyInCart + ")" : "В корзину";
           return (
             '<article class="product-card">' +
             '<img src="' +
@@ -79,25 +81,65 @@
             " / " +
             unit +
             "</span>" +
-            '<button class="btn" data-id="' +
+            '<button type="button" class="btn btn--to-cart" data-id="' +
             id +
-            '">В корзину</button>' +
+            '" data-name="' +
+            name +
+            '">' +
+            btnLabel +
+            "</button>" +
             "</div>" +
             "</div>" +
             "</article>"
           );
         }).join("");
+      }
 
-        root.querySelectorAll("button[data-id]").forEach((btn) => {
-          btn.addEventListener("click", () => {
-            window.CartStore.addToCart(btn.dataset.id, 1);
-            btn.textContent = "Добавлено";
-            setTimeout(() => (btn.textContent = "В корзину"), 700);
-          });
+      function catalogCartButtonLabel(productId) {
+        var q = window.CartStore.getCartQuantity(productId);
+        return q > 0 ? "В корзине (" + q + ")" : "В корзину";
+      }
+
+      function syncCatalogCartButtons() {
+        var root = document.getElementById("product-grid");
+        if (!root) return;
+        root.querySelectorAll("button.btn--to-cart[data-id]").forEach(function (btn) {
+          if (btn.classList.contains("btn--added-success")) return;
+          btn.textContent = catalogCartButtonLabel(btn.dataset.id);
         });
       }
 
+      var catalogAddToCartWired = false;
+      function wireCatalogAddToCart() {
+        if (catalogAddToCartWired) return;
+        var root = document.getElementById("product-grid");
+        if (!root) return;
+        catalogAddToCartWired = true;
+        root.addEventListener("click", function (e) {
+          var btn = e.target.closest("button.btn--to-cart[data-id]");
+          if (!btn || !root.contains(btn)) return;
+          var id = btn.dataset.id;
+          var productName = btn.dataset.name || "Товар";
+          if (btn._addRevertTimer) {
+            clearTimeout(btn._addRevertTimer);
+            btn._addRevertTimer = null;
+          }
+          btn.classList.remove("btn--added-success");
+          window.CartStore.addToCart(id, 1);
+          window.CartStore.showToast(productName + " добавлен в корзину");
+          btn.classList.add("btn--added-success");
+          btn.textContent = "✓ Добавлено";
+          btn._addRevertTimer = setTimeout(function () {
+            btn.classList.remove("btn--added-success");
+            btn.textContent = catalogCartButtonLabel(id);
+            btn._addRevertTimer = null;
+          }, 1500);
+        });
+        window.addEventListener("cart:changed", syncCatalogCartButtons);
+      }
+
       document.addEventListener("DOMContentLoaded", function () {
+        wireCatalogAddToCart();
         if (typeof ensureProductsLoaded === "function") {
           ensureProductsLoaded().then(renderProducts);
         } else {

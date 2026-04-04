@@ -40,6 +40,12 @@ function getCartTotals() {
   return { count, total };
 }
 
+function getCartQuantity(productId) {
+  const cart = readCart();
+  const n = Number(cart[productId] || 0);
+  return Number.isFinite(n) && n > 0 ? Math.floor(n) : 0;
+}
+
 function addToCart(productId, quantity = 1) {
   const cart = readCart();
   cart[productId] = (cart[productId] || 0) + quantity;
@@ -79,13 +85,40 @@ function notifyCartChanged() {
   window.dispatchEvent(new Event("cart:changed"));
 }
 
+function showToast(message) {
+  let stack = document.getElementById("toast-stack");
+  if (!stack) {
+    stack = document.createElement("div");
+    stack.id = "toast-stack";
+    stack.className = "toast-stack";
+    stack.setAttribute("aria-live", "polite");
+    document.body.appendChild(stack);
+  }
+  const el = document.createElement("div");
+  el.className = "toast";
+  el.textContent = message;
+  stack.appendChild(el);
+  requestAnimationFrame(function () {
+    el.classList.add("toast--visible");
+  });
+  setTimeout(function () {
+    el.classList.remove("toast--visible");
+    el.classList.add("toast--leaving");
+    setTimeout(function () {
+      el.remove();
+    }, 280);
+  }, 2000);
+}
+
 window.CartStore = {
   getCartItems,
   getCartDetailedItems,
   getCartTotals,
+  getCartQuantity,
   addToCart,
   setCartQuantity,
   removeFromCart,
   clearCart,
-  formatRub
+  formatRub,
+  showToast
 };

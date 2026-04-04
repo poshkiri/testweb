@@ -458,7 +458,113 @@ select:focus {
   color: #fff;
 }
 
+/* Кнопка «В корзину» на каталоге — краткий успех */
+.btn.btn--to-cart.btn--added-success {
+  background: linear-gradient(135deg, var(--green) 0%, var(--green-dark) 100%);
+  color: #fff;
+  border-color: var(--green-dark);
+}
+
+.btn.btn--to-cart.btn--added-success:hover {
+  filter: brightness(1.05);
+}
+
+/* Toast (уведомления) */
+.toast-stack {
+  position: fixed;
+  right: 20px;
+  bottom: 20px;
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  align-items: flex-end;
+  pointer-events: none;
+  max-width: min(360px, calc(100vw - 40px));
+}
+
+.toast {
+  pointer-events: auto;
+  background: var(--surface);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 14px 18px;
+  box-shadow: var(--shadow);
+  font-weight: 500;
+  font-size: 0.95rem;
+  line-height: 1.4;
+  opacity: 0;
+  transform: translateX(120%);
+  transition:
+    opacity 0.28s ease,
+    transform 0.32s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.toast--visible {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+.toast--leaving {
+  opacity: 0;
+  transform: translateX(40%);
+  transition:
+    opacity 0.22s ease,
+    transform 0.26s ease;
+}
+
+/* Пустая корзина */
+.cart-empty-state {
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: clamp(36px, 8vw, 64px) 24px;
+  gap: 16px;
+}
+
+.cart-empty-state.is-visible {
+  display: flex;
+}
+
+.cart-filled.is-hidden {
+  display: none;
+}
+
+.cart-empty-state__icon {
+  width: 96px;
+  height: 96px;
+  color: var(--muted);
+  opacity: 0.85;
+}
+
+.cart-empty-state__icon svg {
+  width: 100%;
+  height: 100%;
+}
+
+.cart-empty-state__title {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: clamp(1.35rem, 3vw, 1.75rem);
+  font-weight: 600;
+  color: var(--text);
+}
+
+.cart-empty-state .muted {
+  margin: -4px 0 0;
+  max-width: 32ch;
+}
+
 @media (max-width: 700px) {
+  .toast-stack {
+    right: 12px;
+    bottom: 12px;
+    max-width: calc(100vw - 24px);
+  }
+
   .cart-item {
     grid-template-columns: 1fr;
   }
