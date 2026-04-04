@@ -549,8 +549,8 @@ function formatDeliveryStatusLabel(deliveryStatus) {
 async function sendStatusNotification(order, deliveryStatus) {
   const label = formatDeliveryStatusLabel(deliveryStatus);
   const message = [
-    `Статус заказа ${order.orderId} изменён на: ${label}`,
-    `Клиент: ${order.customer.name} (${order.customer.phone})`
+    `📦 Статус заказа ${order.orderId} изменён на: ${label}`,
+    `👤 Клиент: ${order.customer.name} (${order.customer.phone})`
   ].join("\n");
   return sendTelegramMessage(message);
 }
