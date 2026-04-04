@@ -79,7 +79,6 @@ function renderLayout() {
   `;
 
   bindThemeSwitcher();
-  updateCartNav();
   bindCartDropdown();
 }
 
@@ -133,11 +132,20 @@ function renderCartDropdownHtml() {
   );
 }
 
-function updateCartNav() {
+function updateCartBadge() {
   const badge = document.getElementById("cart-badge");
   const body = document.getElementById("cart-dropdown-body");
-  if (!window.CartStore) return;
-  const { count } = window.CartStore.getCartTotals();
+
+  let count = 0;
+  if (window.CartStore && typeof window.CartStore.getCartTotals === "function") {
+    try {
+      const totals = window.CartStore.getCartTotals();
+      count = totals && typeof totals.count === "number" ? totals.count : 0;
+    } catch (_e) {
+      count = 0;
+    }
+  }
+
   if (badge) badge.textContent = String(count);
   if (body) body.innerHTML = renderCartDropdownHtml();
 }
@@ -184,5 +192,9 @@ function bindCartDropdown() {
   }
 }
 
-window.addEventListener("cart:changed", updateCartNav);
-window.addEventListener("DOMContentLoaded", renderLayout);
+window.addEventListener("cart:changed", updateCartBadge);
+window.addEventListener("products:loaded", updateCartBadge);
+window.addEventListener("DOMContentLoaded", () => {
+  renderLayout();
+  updateCartBadge();
+});
