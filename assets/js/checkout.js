@@ -31,7 +31,8 @@ async function handleSubmit(event) {
       phone: form.get("phone"),
       address: form.get("address"),
       contactMethod: form.get("contactMethod") || "phone",
-      comment: form.get("comment") || ""
+      comment: form.get("comment") || "",
+      telegram: form.get("telegram") || ""
     },
     items
   };

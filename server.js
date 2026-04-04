@@ -340,7 +340,8 @@ app.post("/api/orders", async (req, res) => {
       phone: String(customer.phone).trim(),
       address: String(customer.address).trim(),
       contactMethod: customer.contactMethod || "phone",
-      comment: customer.comment || ""
+      comment: customer.comment || "",
+      telegram: String(customer.telegram || "").trim()
     },
     items: normalizedItems,
     total,
@@ -568,13 +569,46 @@ function formatDeliveryStatusLabel(deliveryStatus) {
   return labels[deliveryStatus] || deliveryStatus;
 }
 
+async function sendStatusNotificationToCustomer(order, label) {
+  const token = process.env.TELEGRAM_BOT_TOKEN;
+  if (!token) return;
+  const raw = order.customer && order.customer.telegram;
+  if (!raw || !String(raw).trim()) return;
+  const uname = String(raw).trim().replace(/^@+/, "");
+  if (!uname) return;
+  const chatId = `@${uname}`;
+  const text = [
+    "Привет! Статус вашего заказа изменён.",
+    `📦 Заказ: ${order.orderId}`,
+    `✅ Статус: ${label}`,
+    "",
+    "Если есть вопросы — пишите @da_doroxova"
+  ].join("\n");
+  try {
+    const url = `https://api.telegram.org/bot${token}/sendMessage`;
+    const response = await fetch(url, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ chat_id: chatId, text })
+    });
+    if (!response.ok) {
+      await response.text();
+    }
+  } catch (_e) {
+    /* отправка по @username возможна только если клиент уже писал боту */
+  }
+}
+
 async function sendStatusNotification(order, deliveryStatus) {
   const label = formatDeliveryStatusLabel(deliveryStatus);
   const message = [
     `📦 Статус заказа ${order.orderId} изменён на: ${label}`,
     `👤 Клиент: ${order.customer.name} (${order.customer.phone})`
   ].join("\n");
-  return sendTelegramMessage(message);
+  await sendTelegramMessage(message);
+  if (order.customer && String(order.customer.telegram || "").trim()) {
+    await sendStatusNotificationToCustomer(order, label);
+  }
 }
 
 async function sendTelegramMessage(text) {
