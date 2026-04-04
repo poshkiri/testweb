@@ -4,7 +4,7 @@
       "id": "p1",
       "name": "Фаршированные перцы",
       "price": 655,
-      "image": "https://images.unsplash.com/photo-1586190848861-99aa4a171e90?w=900&q=80",
+      "image": "https://images.unsplash.com/photo-1601050690597-df0568f70950?w=900&q=80",
       "unit": "4-5 шт",
       "category": "Полуфабрикаты",
       "description": "Говядина, домашняя заморозка."
@@ -13,7 +13,7 @@
       "id": "p2",
       "name": "Голубцы",
       "price": 465,
-      "image": "https://images.unsplash.com/photo-1529042410759-befb1204b468?w=900&q=80",
+      "image": "https://images.unsplash.com/photo-1548943487-a2e4e43b4853?w=900&q=80",
       "unit": "6 шт",
       "category": "Полуфабрикаты",
       "description": "Говядина, капуста, рис."
@@ -49,7 +49,7 @@
       "id": "p6",
       "name": "Фрикадельки",
       "price": 475,
-      "image": "https://images.unsplash.com/photo-1529042350493-5f2f8ccbcf0d?w=900&q=80",
+      "image": "https://images.unsplash.com/photo-1520218508822-998633d997e6?w=900&q=80",
       "unit": "0.5 кг",
       "category": "Полуфабрикаты",
       "description": "Домашние фрикадельки из говядины."
@@ -94,7 +94,7 @@
       "id": "p11",
       "name": "Блины с курицей и сыром",
       "price": 76,
-      "image": "https://images.unsplash.com/photo-1587731472724-4b7a4f8ad705?w=900&q=80",
+      "image": "https://images.unsplash.com/photo-1567620905732-2d1ec7ab7445?w=900&q=80",
       "unit": "за 1 шт",
       "category": "Блины",
       "description": "Начинка из курицы и сыра."
@@ -103,7 +103,7 @@
       "id": "p12",
       "name": "Пельмени (говядина)",
       "price": 900,
-      "image": "https://images.unsplash.com/photo-1604908811816-ea56059c0f5e?w=900&q=80",
+      "image": "https://images.unsplash.com/photo-1551638059-d1fb82606c4a?w=900&q=80",
       "unit": "за 1 кг",
       "category": "Полуфабрикаты",
       "description": "Классические домашние пельмени."
