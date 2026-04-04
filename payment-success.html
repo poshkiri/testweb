@@ -134,6 +134,9 @@
             <span class="muted">Итоговая сумма</span>
             <strong id="order-total">0 ₽</strong>
           </div>
+          <div class="actions" style="margin-top: 8px">
+            <button type="button" class="btn primary" id="btn-repeat-order" hidden>Повторить заказ</button>
+          </div>
           <div class="actions">
             <button type="button" class="btn" id="btn-share-order" hidden>Поделиться заказом</button>
             <a class="btn primary" href="/catalog">В каталог</a>
@@ -153,6 +156,7 @@
 
       let currentOrderId = null;
       let statusPollTimer = null;
+      let lastLoadedOrderItems = [];
 
       function formatRub(value) {
         return new Intl.NumberFormat("ru-RU").format(Number(value || 0)) + " ₽";
@@ -255,6 +259,11 @@
           const itemsRoot = document.getElementById("items-list");
           itemsRoot.innerHTML = "";
           const items = Array.isArray(data.items) ? data.items : [];
+          lastLoadedOrderItems = items;
+          const repeatBtn = document.getElementById("btn-repeat-order");
+          if (repeatBtn) {
+            repeatBtn.hidden = items.length === 0;
+          }
           for (const item of items) {
             const row = document.createElement("div");
             row.className = "line";
@@ -271,6 +280,16 @@
 
           document.getElementById("order-total").textContent = formatRub(data.total);
         }
+      }
+
+      function repeatOrderFromPaymentPage() {
+        lastLoadedOrderItems.forEach(function (item) {
+          const id = item && item.id;
+          const qty = Number(item.quantity || 0);
+          if (!id || !Number.isFinite(qty) || qty < 1) return;
+          window.CartStore.addToCart(String(id), qty);
+        });
+        window.location.href = "/cart";
       }
 
       async function copyShareUrl(btn) {
@@ -321,6 +340,8 @@
           setStatusNotice("");
           shareBtn.hidden = true;
           updatedFoot.hidden = true;
+          const repeatBtnMissing = document.getElementById("btn-repeat-order");
+          if (repeatBtnMissing) repeatBtnMissing.hidden = true;
           return;
         }
 
@@ -338,18 +359,28 @@
             statusEl.className = "status-badge status-cancelled";
             document.getElementById("order-status-notice").className = "order-status-notice";
             updatedFoot.hidden = true;
+            lastLoadedOrderItems = [];
+            const repeatNotFound = document.getElementById("btn-repeat-order");
+            if (repeatNotFound) repeatNotFound.hidden = true;
             return;
           }
 
           applyOrderPayload(data, { silent: false });
           touchLastUpdated();
           startStatusPolling();
+          const repeatOk = document.getElementById("btn-repeat-order");
+          if (repeatOk) {
+            repeatOk.onclick = repeatOrderFromPaymentPage;
+          }
         } catch (_e) {
           metaEl.textContent = "Не удалось связаться с сервером.";
           statusEl.textContent = "Ошибка";
           statusEl.className = "status-badge status-cancelled";
           document.getElementById("order-status-notice").className = "order-status-notice";
           updatedFoot.hidden = true;
+          lastLoadedOrderItems = [];
+          const repeatErr = document.getElementById("btn-repeat-order");
+          if (repeatErr) repeatErr.hidden = true;
         }
       }
 

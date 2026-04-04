@@ -42,6 +42,14 @@
             <div id="cart-summary"></div>
           </div>
         </section>
+
+        <section class="panel" id="recent-order-section" hidden>
+          <h3>Недавние заказы</h3>
+          <div id="recent-order-body" class="cart-list" style="margin-top: 12px"></div>
+          <div class="actions" style="margin-top: 16px">
+            <button type="button" class="btn primary" id="btn-repeat-last-order">Повторить этот заказ</button>
+          </div>
+        </section>
       </div>
     </main>
     <div id="footer-root"></div>
@@ -49,6 +57,84 @@
     <script src="assets/js/cart.js"></script>
     <script src="assets/js/layout.js"></script>
     <script>
+      function getLastOrderDraft() {
+        try {
+          const raw = window.localStorage.getItem("lastOrderDraft");
+          if (!raw) return null;
+          const d = JSON.parse(raw);
+          if (!d || !Array.isArray(d.items) || !d.items.length) return null;
+          return d;
+        } catch (_e) {
+          return null;
+        }
+      }
+
+      function formatRecentOrderDate(iso) {
+        const date = new Date(iso);
+        if (Number.isNaN(date.getTime())) return "—";
+        return new Intl.DateTimeFormat("ru-RU", { dateStyle: "medium", timeStyle: "short" }).format(date);
+      }
+
+      function renderRecentOrderBlock() {
+        const section = document.getElementById("recent-order-section");
+        const body = document.getElementById("recent-order-body");
+        const btn = document.getElementById("btn-repeat-last-order");
+        if (!section || !body || !btn) return;
+
+        const draft = getLastOrderDraft();
+        if (!draft) {
+          section.hidden = true;
+          return;
+        }
+
+        section.hidden = false;
+        const esc = typeof window.escapeHtml === "function" ? window.escapeHtml : function (s) { return String(s); };
+
+        const itemLines = draft.items
+          .map(function (it) {
+            const name = esc(it.name || "Товар");
+            const q = Number(it.quantity || 0);
+            const lineTotal =
+              it.lineTotal != null && it.lineTotal !== ""
+                ? Number(it.lineTotal)
+                : Number(it.price || 0) * q;
+            return (
+              "<li>" +
+              name +
+              " × " +
+              q +
+              " — <strong>" +
+              window.CartStore.formatRub(lineTotal) +
+              "</strong></li>"
+            );
+          })
+          .join("");
+
+        body.innerHTML =
+          "<p class='muted'>" +
+          "<strong>" +
+          esc(String(draft.orderId || "—")) +
+          "</strong> · " +
+          formatRecentOrderDate(draft.date) +
+          "</p>" +
+          "<ul style='margin:8px 0 0;padding-left:1.25em'>" +
+          itemLines +
+          "</ul>" +
+          "<p style='margin-top:12px'><strong>Итого: " +
+          window.CartStore.formatRub(draft.total) +
+          "</strong></p>";
+
+        btn.onclick = function () {
+          draft.items.forEach(function (it) {
+            const id = it && it.id;
+            const qty = Number(it.quantity || 0);
+            if (!id || !Number.isFinite(qty) || qty < 1) return;
+            window.CartStore.addToCart(String(id), qty);
+          });
+          renderCart();
+        };
+      }
+
       function renderCart() {
         const list = document.getElementById("cart-list");
         const summary = document.getElementById("cart-summary");
@@ -56,6 +142,7 @@
 
         const emptyState = document.getElementById("cart-empty-state");
         const filled = document.getElementById("cart-filled");
+        const recentSection = document.getElementById("recent-order-section");
 
         if (!items.length) {
           list.innerHTML = "";
@@ -63,8 +150,11 @@
           emptyState.classList.add("is-visible");
           emptyState.setAttribute("aria-hidden", "false");
           filled.classList.add("is-hidden");
+          renderRecentOrderBlock();
           return;
         }
+
+        if (recentSection) recentSection.hidden = true;
 
         emptyState.classList.remove("is-visible");
         emptyState.setAttribute("aria-hidden", "true");

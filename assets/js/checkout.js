@@ -67,7 +67,22 @@ async function handleSubmit(event) {
       return;
     }
 
-    window.localStorage.setItem("lastOrderDraft", JSON.stringify(data));
+    const draftItems = window.CartStore.getCartDetailedItems().map((item) => ({
+      id: item.id,
+      name: item.name,
+      quantity: item.quantity,
+      price: item.price,
+      lineTotal: item.lineTotal
+    }));
+    window.localStorage.setItem(
+      "lastOrderDraft",
+      JSON.stringify({
+        orderId: data.orderId,
+        items: draftItems,
+        total: data.total,
+        date: new Date().toISOString()
+      })
+    );
 
     window.CartStore.clearCart();
     renderCheckoutItems();
