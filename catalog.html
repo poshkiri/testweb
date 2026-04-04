@@ -24,7 +24,24 @@
     <main>
       <div class="container">
         <h1 class="section-title">Каталог товаров</h1>
+        <div id="catalog-toolbar" class="cart-list" style="gap: 16px; margin-bottom: 20px; display: none">
+          <input
+            type="search"
+            id="catalog-search"
+            placeholder="Поиск по названию..."
+            autocomplete="off"
+            aria-label="Поиск по названию и описанию"
+            style="max-width: 420px; width: 100%; padding: 12px 14px; border-radius: 12px; border: 1px solid var(--border); font: inherit; background: var(--surface); color: var(--text)"
+          />
+          <div id="catalog-category-buttons" class="actions" style="margin-top: 0; flex-wrap: wrap"></div>
+        </div>
         <div id="product-grid" class="grid"></div>
+        <div id="catalog-no-results" class="panel" hidden>
+          <p class="muted" id="catalog-no-results-text"></p>
+          <div class="actions" style="margin-top: 12px">
+            <button type="button" class="btn primary" id="catalog-reset-filters">Сбросить фильтр</button>
+          </div>
+        </div>
       </div>
     </main>
     <div id="footer-root"></div>
@@ -32,6 +49,141 @@
     <script src="assets/js/cart.js"></script>
     <script src="assets/js/layout.js"></script>
     <script>
+      var catalogActiveCategory = "all";
+
+      function escapeAttr(value) {
+        return String(value)
+          .replace(/&/g, "&amp;")
+          .replace(/"/g, "&quot;")
+          .replace(/</g, "&lt;");
+      }
+
+      function normalizeCategory(p) {
+        return String((p && p.category) || "").trim();
+      }
+
+      function productMatchesSearch(p, query) {
+        if (!query) return true;
+        var hay = (String(p.name || "") + " " + String(p.description || "")).toLowerCase();
+        return hay.indexOf(query.toLowerCase()) !== -1;
+      }
+
+      function productMatchesCategory(p, activeCat) {
+        if (activeCat === "all") return true;
+        return normalizeCategory(p) === activeCat;
+      }
+
+      function renderCategoryButtons() {
+        var wrap = document.getElementById("catalog-category-buttons");
+        var toolbar = document.getElementById("catalog-toolbar");
+        var noResults = document.getElementById("catalog-no-results");
+        if (!wrap) return;
+        if (!window.PRODUCTS.length) {
+          if (toolbar) toolbar.style.display = "none";
+          if (noResults) noResults.hidden = true;
+          return;
+        }
+        if (toolbar) toolbar.style.display = "";
+
+        var categories = new Set();
+        window.PRODUCTS.forEach(function (p) {
+          var c = normalizeCategory(p);
+          if (c) categories.add(c);
+        });
+        var sorted = Array.from(categories).sort(function (a, b) {
+          return a.localeCompare(b, "ru");
+        });
+        var labels = [{ key: "all", label: "Все" }].concat(
+          sorted.map(function (c) {
+            return { key: c, label: c };
+          })
+        );
+
+        wrap.innerHTML = labels
+          .map(function (item) {
+            var active = catalogActiveCategory === item.key;
+            var cls = active ? "btn primary" : "btn";
+            return (
+              '<button type="button" class="' +
+              cls +
+              '" data-category="' +
+              escapeAttr(item.key) +
+              '">' +
+              window.escapeHtml(item.label) +
+              "</button>"
+            );
+          })
+          .join("");
+
+        wrap.querySelectorAll("button[data-category]").forEach(function (btn) {
+          btn.addEventListener("click", function () {
+            catalogActiveCategory = btn.getAttribute("data-category") || "all";
+            wrap.querySelectorAll("button[data-category]").forEach(function (b) {
+              var on = (b.getAttribute("data-category") || "all") === catalogActiveCategory;
+              b.className = on ? "btn primary" : "btn";
+            });
+            applyCatalogFilters();
+          });
+        });
+      }
+
+      function applyCatalogFilters() {
+        var grid = document.getElementById("product-grid");
+        var empty = document.getElementById("catalog-no-results");
+        var emptyText = document.getElementById("catalog-no-results-text");
+        var searchEl = document.getElementById("catalog-search");
+        if (!grid || !empty || !emptyText) return;
+
+        if (!window.PRODUCTS.length) {
+          empty.hidden = true;
+          grid.style.display = "";
+          return;
+        }
+
+        if (!grid.querySelector(".product-card")) {
+          empty.hidden = true;
+          grid.style.display = "";
+          return;
+        }
+
+        var q = (searchEl && searchEl.value.trim()) || "";
+        var visible = 0;
+
+        grid.querySelectorAll(".product-card").forEach(function (card) {
+          var id = card.dataset.productId;
+          var p = window.PRODUCTS.find(function (x) {
+            return x.id === id;
+          });
+          if (!p) return;
+          var catOk = productMatchesCategory(p, catalogActiveCategory);
+          var searchOk = productMatchesSearch(p, q);
+          var show = catOk && searchOk;
+          card.style.display = show ? "" : "none";
+          if (show) visible++;
+        });
+
+        if (visible === 0) {
+          empty.hidden = false;
+          grid.style.display = "none";
+          if (q) {
+            emptyText.textContent = "Ничего не найдено по запросу «" + q + "»";
+          } else {
+            emptyText.textContent = "Ничего не найдено по выбранным условиям";
+          }
+        } else {
+          empty.hidden = true;
+          grid.style.display = "";
+        }
+      }
+
+      function resetCatalogFilters() {
+        catalogActiveCategory = "all";
+        var searchEl = document.getElementById("catalog-search");
+        if (searchEl) searchEl.value = "";
+        renderCategoryButtons();
+        applyCatalogFilters();
+      }
+
       function emptyCatalogMessage() {
         if (location.protocol === "file:") {
           return (
@@ -60,9 +212,13 @@
       }
 
       function renderProducts() {
-        const root = document.getElementById("product-grid");
+        var root = document.getElementById("product-grid");
+        var toolbar = document.getElementById("catalog-toolbar");
         if (!window.PRODUCTS.length) {
           root.innerHTML = emptyCatalogMessage();
+          if (toolbar) toolbar.style.display = "none";
+          var emptyState = document.getElementById("catalog-no-results");
+          if (emptyState) emptyState.hidden = true;
           return;
         }
         root.innerHTML = window.PRODUCTS.map(function (p) {
@@ -71,10 +227,16 @@
           var img = window.escapeHtml(p.image || "");
           var id = window.escapeHtml(p.id);
           var unit = window.escapeHtml(p.unit || "");
+          var cat = normalizeCategory(p);
+          var catAttr = escapeAttr(cat);
           var qtyInCart = window.CartStore.getCartQuantity(p.id);
           var btnLabel = qtyInCart > 0 ? "В корзине (" + qtyInCart + ")" : "В корзину";
           return (
-            '<article class="product-card">' +
+            '<article class="product-card" data-product-id="' +
+            id +
+            '" data-category="' +
+            catAttr +
+            '">' +
             '<img src="' +
             img +
             '" alt="' +
@@ -105,6 +267,8 @@
             "</article>"
           );
         }).join("");
+        renderCategoryButtons();
+        applyCatalogFilters();
       }
 
       function catalogCartButtonLabel(productId) {
@@ -152,6 +316,14 @@
 
       document.addEventListener("DOMContentLoaded", function () {
         wireCatalogAddToCart();
+        var searchEl = document.getElementById("catalog-search");
+        if (searchEl) {
+          searchEl.addEventListener("input", applyCatalogFilters);
+        }
+        var resetBtn = document.getElementById("catalog-reset-filters");
+        if (resetBtn) {
+          resetBtn.addEventListener("click", resetCatalogFilters);
+        }
         if (typeof ensureProductsLoaded === "function") {
           ensureProductsLoaded().then(renderProducts);
         } else {
