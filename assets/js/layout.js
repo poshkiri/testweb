@@ -103,6 +103,7 @@ function renderCartDropdownHtml() {
   const preview = detailed.slice(0, 3);
   const lines = preview
     .map(function (item) {
+      const idAttr = escLayout(String(item.id));
       return (
         '<li class="cart-dropdown__line">' +
         '<span class="cart-dropdown__name">' +
@@ -114,6 +115,9 @@ function renderCartDropdownHtml() {
         '<span class="cart-dropdown__price">' +
         window.CartStore.formatRub(item.lineTotal) +
         "</span>" +
+        '<button type="button" class="btn-remove cart-dropdown__remove" data-cart-remove="' +
+        idAttr +
+        '" aria-label="Удалить из корзины">✕</button>' +
         "</li>"
       );
     })
@@ -190,6 +194,16 @@ function bindCartDropdown() {
     });
     document.addEventListener("click", onDocClick);
   }
+
+  dropdown.addEventListener("click", function (e) {
+    const removeBtn = e.target.closest("[data-cart-remove]");
+    if (!removeBtn || !dropdown.contains(removeBtn)) return;
+    e.preventDefault();
+    e.stopPropagation();
+    const id = removeBtn.getAttribute("data-cart-remove");
+    if (!id || !window.CartStore || typeof window.CartStore.removeFromCart !== "function") return;
+    window.CartStore.removeFromCart(id);
+  });
 }
 
 window.addEventListener("cart:changed", updateCartBadge);

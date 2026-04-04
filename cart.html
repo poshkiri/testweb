@@ -167,10 +167,13 @@
               <strong>${item.name}</strong>
               <div class="muted">${window.CartStore.formatRub(item.price)} / ${item.unit}</div>
             </div>
-            <div class="qty-controls">
-              <button data-action="minus" data-id="${item.id}">-</button>
-              <span>${item.quantity}</span>
-              <button data-action="plus" data-id="${item.id}">+</button>
+            <div class="cart-item__controls">
+              <div class="qty-controls">
+                <button data-action="minus" data-id="${item.id}">-</button>
+                <span>${item.quantity}</span>
+                <button data-action="plus" data-id="${item.id}">+</button>
+              </div>
+              <button type="button" class="btn-remove" data-action="remove" data-id="${item.id}">✕ Удалить</button>
             </div>
             <div>
               <strong>${window.CartStore.formatRub(item.lineTotal)}</strong>
@@ -191,6 +194,11 @@
         list.querySelectorAll("button[data-id]").forEach((btn) => {
           btn.addEventListener("click", () => {
             const { id, action } = btn.dataset;
+            if (action === "remove") {
+              window.CartStore.removeFromCart(id);
+              renderCart();
+              return;
+            }
             const current = window.CartStore.getCartDetailedItems().find((i) => i.id === id)?.quantity || 1;
             const next = action === "plus" ? current + 1 : current - 1;
             window.CartStore.setCartQuantity(id, next);

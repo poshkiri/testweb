@@ -215,9 +215,9 @@ body {
 
 .cart-dropdown__line {
   display: grid;
-  grid-template-columns: 1fr auto auto;
+  grid-template-columns: 1fr auto auto auto;
   gap: 8px 10px;
-  align-items: baseline;
+  align-items: center;
   font-size: 0.92rem;
   line-height: 1.35;
 }
@@ -256,6 +256,35 @@ body {
   width: 100%;
   text-align: center;
   justify-content: center;
+}
+
+.cart-dropdown .btn-remove {
+  font-size: 0.85rem;
+  padding: 2px 6px;
+  line-height: 1;
+}
+
+.btn-remove {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--muted);
+  font-size: 1rem;
+  padding: 4px 8px;
+  border-radius: 6px;
+  transition: color 0.2s, background 0.2s;
+}
+
+.btn-remove:hover {
+  color: #b71c1c;
+  background: color-mix(in srgb, #b71c1c 8%, transparent);
+}
+
+.cart-item__controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
 }
 
 main {
