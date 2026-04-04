@@ -62,28 +62,10 @@ async function handleSubmit(event) {
       return;
     }
 
-    if (data.paymentError) {
-      result.textContent =
-        "Заказ " +
-        data.orderId +
-        " создан. Онлайн-оплата не запустилась: " +
-        data.paymentError +
-        " Свяжитесь с нами или попробуйте позже.";
-      window.CartStore.clearCart();
-      event.currentTarget.reset();
-      renderCheckoutItems();
-      return;
-    }
-
     window.CartStore.clearCart();
     event.currentTarget.reset();
     renderCheckoutItems();
-    result.textContent =
-      "Заказ " +
-      data.orderId +
-      " принят. Онлайн-оплата не настроена — оплату можно согласовать по телефону (статус оплаты: " +
-      (data.paymentStatus || "pending") +
-      ").";
+    window.location.href = "/payment-success?orderId=" + encodeURIComponent(data.orderId);
   } catch (_error) {
     result.textContent = "Сервер недоступен. Проверьте, что backend запущен.";
   }
