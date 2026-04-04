@@ -10,16 +10,94 @@
   <body>
     <div id="header-root"></div>
     <main>
-      <div class="container">
+      <div class="container cart-list" style="gap: 24px">
         <h1 class="section-title">Контакты и условия</h1>
+
         <section class="panel">
-          <p><strong>Телефон:</strong> +7 (950) 111-07-33</p>
-          <p><strong>Telegram:</strong> @da_doroxova</p>
-          <p><strong>WhatsApp:</strong> по номеру телефона</p>
-          <p class="muted">
-            Доставка и подтверждение заказа согласуются после оформления.
-            Оператор связывается с вами для уточнения деталей.
+          <h3>Контакты</h3>
+          <p class="muted" style="margin-top: 0">
+            Доставка и подтверждение заказа согласуются после оформления. Оператор связывается с вами для
+            уточнения деталей.
           </p>
+          <div class="cart-list" style="margin-top: 16px">
+            <p style="margin: 0">
+              <strong>Телефон:</strong>
+              <a href="tel:+79501110733">+7 (950) 111-07-33</a>
+            </p>
+            <p style="margin: 0">
+              <strong>Telegram:</strong>
+              <a href="https://t.me/da_doroxova" target="_blank" rel="noopener noreferrer">@da_doroxova</a>
+            </p>
+            <p style="margin: 0">
+              <strong>WhatsApp:</strong>
+              <a href="https://wa.me/79501110733" target="_blank" rel="noopener noreferrer"
+                >Написать в WhatsApp</a
+              >
+            </p>
+          </div>
+        </section>
+
+        <section class="panel">
+          <h3>Условия доставки</h3>
+          <div class="grid" style="margin-top: 16px">
+            <article class="product-card">
+              <div class="product-content">
+                <strong>🕐 Время доставки</strong>
+                <span class="muted">Согласовывается с оператором</span>
+              </div>
+            </article>
+            <article class="product-card">
+              <div class="product-content">
+                <strong>📦 Минимальный заказ</strong>
+                <span class="muted">Не указан</span>
+              </div>
+            </article>
+            <article class="product-card">
+              <div class="product-content">
+                <strong>💳 Оплата</strong>
+                <span class="muted">При получении или онлайн</span>
+              </div>
+            </article>
+            <article class="product-card">
+              <div class="product-content">
+                <strong>📍 Зона доставки</strong>
+                <span class="muted">Уточняйте у оператора</span>
+              </div>
+            </article>
+          </div>
+        </section>
+
+        <section class="panel">
+          <h3>Как сделать заказ</h3>
+          <div class="grid" style="margin-top: 16px">
+            <article class="product-card">
+              <div class="product-content">
+                <span class="muted" style="font-weight: 700">Шаг 1</span>
+                <strong>Выберите товары в каталоге</strong>
+              </div>
+            </article>
+            <article class="product-card">
+              <div class="product-content">
+                <span class="muted" style="font-weight: 700">Шаг 2</span>
+                <strong>Добавьте в корзину</strong>
+              </div>
+            </article>
+            <article class="product-card">
+              <div class="product-content">
+                <span class="muted" style="font-weight: 700">Шаг 3</span>
+                <strong>Оформите заказ</strong>
+              </div>
+            </article>
+            <article class="product-card">
+              <div class="product-content">
+                <span class="muted" style="font-weight: 700">Шаг 4</span>
+                <strong>Оператор свяжется с вами</strong>
+              </div>
+            </article>
+          </div>
+          <div class="actions" style="margin-top: 20px">
+            <a class="btn primary" href="/catalog">Перейти в каталог</a>
+          </div>
         </section>
       </div>
     </main>
@@ -28,4 +106,4 @@
     <script src="assets/js/cart.js"></script>
     <script src="assets/js/layout.js"></script>
   </body>
-  </html>
+</html>

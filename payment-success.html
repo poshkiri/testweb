@@ -7,6 +7,22 @@
     <script src="assets/js/theme-init.js"></script>
     <link rel="stylesheet" href="assets/css/styles.css" />
     <style>
+      @keyframes fadeInUp {
+        from {
+          opacity: 0;
+          transform: translateY(28px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      .payment-success-animate {
+        animation: fadeInUp 0.65s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+        opacity: 0;
+      }
+
       .status-badge {
         display: inline-flex;
         align-items: center;
@@ -22,6 +38,35 @@
       .status-delivering { background: #6a1b9a; }
       .status-done { background: #1b5e20; }
       .status-cancelled { background: #c62828; }
+
+      .order-status-notice {
+        display: none;
+        margin-top: 14px;
+        padding: 14px 16px;
+        border-radius: 12px;
+        font-weight: 600;
+        line-height: 1.45;
+      }
+      .order-status-notice.is-visible {
+        display: block;
+      }
+      .order-status-notice.delivering {
+        background: rgba(106, 27, 154, 0.12);
+        border: 1px solid rgba(106, 27, 154, 0.35);
+        color: var(--text, #1a1a1a);
+      }
+      .order-status-notice.done {
+        background: rgba(46, 125, 50, 0.12);
+        border: 1px solid rgba(46, 125, 50, 0.35);
+        color: var(--text, #1a1a1a);
+      }
+
+      .payment-success-footer {
+        margin-top: 10px;
+        padding-top: 8px;
+        font-size: 0.85rem;
+        color: var(--muted, #666);
+      }
 
       .summary-grid {
         display: grid;
@@ -49,7 +94,7 @@
   <body>
     <div id="header-root"></div>
     <main>
-      <div class="container stack">
+      <div class="container stack payment-success-animate">
         <section class="panel">
           <h1 class="section-title order-ok">✅ Заказ принят!</h1>
           <p class="muted" id="order-meta">Загружаем данные заказа...</p>
@@ -57,6 +102,7 @@
             <span class="muted">Статус доставки:</span>
             <span id="delivery-status" class="status-badge status-new">Новый</span>
           </p>
+          <div id="order-status-notice" class="order-status-notice" role="status" aria-live="polite"></div>
         </section>
 
         <section class="panel">
@@ -77,10 +123,12 @@
             <strong id="order-total">0 ₽</strong>
           </div>
           <div class="actions">
+            <button type="button" class="btn" id="btn-share-order" hidden>Поделиться заказом</button>
             <a class="btn primary" href="/catalog">В каталог</a>
             <a class="btn" href="/contacts">Контакты</a>
           </div>
         </section>
+        <p id="payment-success-updated" class="payment-success-footer muted" hidden></p>
       </div>
     </main>
     <div id="footer-root"></div>
@@ -88,6 +136,12 @@
     <script src="assets/js/cart.js"></script>
     <script src="assets/js/layout.js"></script>
     <script>
+      const SHARE_ORDER_BASE = "https://testweb-production-ce4a.up.railway.app/payment-success";
+      const STATUS_POLL_MS = 30000;
+
+      let currentOrderId = null;
+      let statusPollTimer = null;
+
       function formatRub(value) {
         return new Intl.NumberFormat("ru-RU").format(Number(value || 0)) + " ₽";
       }
@@ -98,6 +152,13 @@
         return new Intl.DateTimeFormat("ru-RU", {
           dateStyle: "medium",
           timeStyle: "short"
+        }).format(date);
+      }
+
+      function formatTimeHm(date) {
+        return new Intl.DateTimeFormat("ru-RU", {
+          hour: "2-digit",
+          minute: "2-digit"
         }).format(date);
       }
 
@@ -113,34 +174,67 @@
         return map[deliveryStatus] || { label: String(deliveryStatus || "Новый"), cls: "status-new" };
       }
 
-      async function loadOrder() {
-        const params = new URLSearchParams(window.location.search);
-        const orderId = params.get("orderId");
+      function setStatusNotice(deliveryStatus) {
+        const el = document.getElementById("order-status-notice");
+        el.className = "order-status-notice";
+        el.textContent = "";
+        if (!deliveryStatus || (deliveryStatus !== "delivering" && deliveryStatus !== "done")) {
+          return;
+        }
+        if (deliveryStatus === "delivering") {
+          el.textContent = "Ваш заказ в пути! Ожидайте звонка от оператора.";
+          el.classList.add("delivering", "is-visible");
+          return;
+        }
+        if (deliveryStatus === "done") {
+          el.textContent = "Заказ доставлен! Приятного аппетита 🍽";
+          el.classList.add("done", "is-visible");
+        }
+      }
+
+      function touchLastUpdated() {
+        const foot = document.getElementById("payment-success-updated");
+        foot.hidden = false;
+        foot.textContent = "Обновлено: " + formatTimeHm(new Date());
+      }
+
+      function startStatusPolling() {
+        if (statusPollTimer) clearInterval(statusPollTimer);
+        if (!currentOrderId) return;
+        statusPollTimer = setInterval(function () {
+          fetchOrderSilent();
+        }, STATUS_POLL_MS);
+      }
+
+      async function fetchOrderSilent() {
+        if (!currentOrderId) return;
+        try {
+          const response = await fetch("/api/orders/" + encodeURIComponent(currentOrderId));
+          const data = await response.json();
+          if (!response.ok || !data.ok) return;
+          applyOrderPayload(data, { silent: true });
+          touchLastUpdated();
+        } catch (_e) {
+          /* тихо пропускаем */
+        }
+      }
+
+      function applyOrderPayload(data, opts) {
+        const silent = opts && opts.silent;
         const metaEl = document.getElementById("order-meta");
         const statusEl = document.getElementById("delivery-status");
 
-        if (!orderId) {
-          metaEl.textContent = "Не указан orderId в URL.";
-          statusEl.textContent = "Неизвестно";
-          return;
+        if (!silent) {
+          metaEl.textContent =
+            "Номер заказа: " + data.orderId + " · Дата оформления: " + formatDate(data.createdAt);
         }
 
-        try {
-          const response = await fetch("/api/orders/" + encodeURIComponent(orderId));
-          const data = await response.json();
-          if (!response.ok || !data.ok) {
-            metaEl.textContent = data.message || "Не удалось получить заказ.";
-            statusEl.textContent = "Не найден";
-            statusEl.className = "status-badge status-cancelled";
-            return;
-          }
+        const status = statusView(data.deliveryStatus);
+        statusEl.textContent = status.label;
+        statusEl.className = "status-badge " + status.cls;
+        setStatusNotice(data.deliveryStatus || "new");
 
-          metaEl.textContent = "Номер заказа: " + data.orderId + " · Дата оформления: " + formatDate(data.createdAt);
-
-          const status = statusView(data.deliveryStatus);
-          statusEl.textContent = status.label;
-          statusEl.className = "status-badge " + status.cls;
-
+        if (!silent) {
           document.getElementById("customer-name").textContent = data.customer?.name || "—";
           document.getElementById("customer-phone").textContent = data.customer?.phone || "—";
           document.getElementById("customer-address").textContent = data.customer?.address || "—";
@@ -164,10 +258,86 @@
           }
 
           document.getElementById("order-total").textContent = formatRub(data.total);
+        }
+      }
+
+      async function copyShareUrl(btn) {
+        if (!currentOrderId) return;
+        const url =
+          SHARE_ORDER_BASE + "?orderId=" + encodeURIComponent(currentOrderId);
+        try {
+          await navigator.clipboard.writeText(url);
+        } catch (_e) {
+          const ta = document.createElement("textarea");
+          ta.value = url;
+          ta.setAttribute("readonly", "");
+          ta.style.position = "fixed";
+          ta.style.left = "-9999px";
+          document.body.appendChild(ta);
+          ta.select();
+          try {
+            document.execCommand("copy");
+          } catch (_e2) {
+            /* ignore */
+          }
+          document.body.removeChild(ta);
+        }
+        const orig = btn.textContent;
+        btn.textContent = "Ссылка скопирована!";
+        setTimeout(function () {
+          btn.textContent = orig;
+        }, 2000);
+      }
+
+      async function loadOrder() {
+        const params = new URLSearchParams(window.location.search);
+        const orderId = params.get("orderId");
+        const metaEl = document.getElementById("order-meta");
+        const statusEl = document.getElementById("delivery-status");
+        const shareBtn = document.getElementById("btn-share-order");
+        const updatedFoot = document.getElementById("payment-success-updated");
+
+        if (statusPollTimer) {
+          clearInterval(statusPollTimer);
+          statusPollTimer = null;
+        }
+        currentOrderId = orderId;
+
+        if (!orderId) {
+          metaEl.textContent = "Не указан orderId в URL.";
+          statusEl.textContent = "Неизвестно";
+          setStatusNotice("");
+          shareBtn.hidden = true;
+          updatedFoot.hidden = true;
+          return;
+        }
+
+        shareBtn.hidden = false;
+        shareBtn.onclick = function () {
+          copyShareUrl(shareBtn);
+        };
+
+        try {
+          const response = await fetch("/api/orders/" + encodeURIComponent(orderId));
+          const data = await response.json();
+          if (!response.ok || !data.ok) {
+            metaEl.textContent = data.message || "Не удалось получить заказ.";
+            statusEl.textContent = "Не найден";
+            statusEl.className = "status-badge status-cancelled";
+            document.getElementById("order-status-notice").className = "order-status-notice";
+            updatedFoot.hidden = true;
+            return;
+          }
+
+          applyOrderPayload(data, { silent: false });
+          touchLastUpdated();
+          startStatusPolling();
         } catch (_e) {
           metaEl.textContent = "Не удалось связаться с сервером.";
           statusEl.textContent = "Ошибка";
           statusEl.className = "status-badge status-cancelled";
+          document.getElementById("order-status-notice").className = "order-status-notice";
+          updatedFoot.hidden = true;
         }
       }
 
