@@ -33,7 +33,7 @@ app.get("/catalog", (req, res) => res.sendFile(path.join(__dirname, "catalog.htm
 app.get("/cart", (req, res) => res.sendFile(path.join(__dirname, "cart.html")));
 app.get("/checkout", (req, res) => res.sendFile(path.join(__dirname, "checkout.html")));
 app.get("/contacts", (req, res) => res.sendFile(path.join(__dirname, "contacts.html")));
-app.get("/admin", (req, res) => res.sendFile(path.join(__dirname, "admin.html")));
+app.get('/admin', (req, res) => res.sendFile(path.join(__dirname, 'admin.html')));
 app.get("/payment-success", (req, res) => res.sendFile(path.join(__dirname, "payment-success.html")));
 app.get("/privacy", (req, res) => res.sendFile(path.join(__dirname, "privacy.html")));
 app.use(express.static(path.join(__dirname)));

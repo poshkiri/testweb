@@ -25,11 +25,14 @@
         gap: 10px;
         margin: 14px 0;
       }
-      .tab-content {
+      .tab-panel {
         display: none;
       }
-      .tab-content.active {
+      .tab-panel.is-active {
         display: block;
+      }
+      .tab-actions {
+        margin-top: 0;
       }
       .orders-list {
         display: grid;
@@ -222,15 +225,15 @@
           <button type="button" class="btn" id="tab-catalog">Каталог</button>
         </div>
 
-        <section class="panel tab-content active" id="orders-tab-content">
-          <div class="actions" style="margin-top: 0">
+        <section class="panel tab-panel is-active" id="orders-tab-content" aria-labelledby="tab-orders">
+          <div class="actions tab-actions">
             <button type="button" class="btn" id="btn-orders-refresh">Обновить</button>
           </div>
           <p id="orders-msg" class="muted"></p>
           <div id="orders-list" class="orders-list"></div>
         </section>
 
-        <section class="panel tab-content" id="catalog-tab-content">
+        <section class="panel tab-panel" id="catalog-tab-content" aria-labelledby="tab-catalog">
           <div class="admin-toolbar">
             <button type="button" class="btn" id="btn-load">Загрузить</button>
             <button type="button" class="btn primary" id="btn-save">Сохранить</button>
@@ -642,15 +645,15 @@
         const catalogContent = document.getElementById("catalog-tab-content");
 
         if (tab === "orders") {
-          ordersContent.style.display = "block";
-          catalogContent.style.display = "none";
+          ordersContent.classList.add("is-active");
+          catalogContent.classList.remove("is-active");
           ordersBtn.className = "btn primary";
           catalogBtn.className = "btn";
           return;
         }
 
-        ordersContent.style.display = "none";
-        catalogContent.style.display = "block";
+        ordersContent.classList.remove("is-active");
+        catalogContent.classList.add("is-active");
         ordersBtn.className = "btn";
         catalogBtn.className = "btn primary";
       }
