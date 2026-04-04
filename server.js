@@ -28,6 +28,14 @@ const upload = multer({
 
 app.use(cors());
 app.use(express.json({ limit: "1mb" }));
+app.get("/", (req, res) => res.sendFile(path.join(__dirname, "index.html")));
+app.get("/catalog", (req, res) => res.sendFile(path.join(__dirname, "catalog.html")));
+app.get("/cart", (req, res) => res.sendFile(path.join(__dirname, "cart.html")));
+app.get("/checkout", (req, res) => res.sendFile(path.join(__dirname, "checkout.html")));
+app.get("/contacts", (req, res) => res.sendFile(path.join(__dirname, "contacts.html")));
+app.get("/admin", (req, res) => res.sendFile(path.join(__dirname, "admin.html")));
+app.get("/payment-success", (req, res) => res.sendFile(path.join(__dirname, "payment-success.html")));
+app.get("/privacy", (req, res) => res.sendFile(path.join(__dirname, "privacy.html")));
 app.use(express.static(path.join(__dirname)));
 app.use("/uploads", express.static(UPLOADS_DIR));
 
@@ -337,7 +345,7 @@ app.post("/api/orders", async (req, res) => {
 
   if (isYooKassaConfigured()) {
     try {
-      const returnUrl = `${PUBLIC_BASE_URL}/payment-success.html?orderId=${encodeURIComponent(orderId)}`;
+      const returnUrl = `${PUBLIC_BASE_URL}/payment-success?orderId=${encodeURIComponent(orderId)}`;
       const created = await createYooKassaPayment(order, returnUrl);
       order.yooPaymentId = created.id;
       saveOrder(order);

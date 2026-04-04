@@ -2,7 +2,7 @@ function renderCheckoutItems() {
   const root = document.getElementById("checkout-items");
   const items = window.CartStore.getCartDetailedItems();
   if (!items.length) {
-    root.innerHTML = "<p class='muted'>Корзина пуста. Добавьте товары из каталога.</p><a class='btn' href='catalog.html'>Перейти в каталог</a>";
+    root.innerHTML = "<p class='muted'>Корзина пуста. Добавьте товары из каталога.</p><a class='btn' href='/catalog'>Перейти в каталог</a>";
     return;
   }
 

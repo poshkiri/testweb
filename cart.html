@@ -30,7 +30,7 @@
 
         if (!items.length) {
           list.innerHTML = "<p class='muted'>Корзина пока пустая.</p>";
-          summary.innerHTML = "<a class='btn primary' href='catalog.html'>Выбрать товары</a>";
+          summary.innerHTML = "<a class='btn primary' href='/catalog'>Выбрать товары</a>";
           return;
         }
 
@@ -57,8 +57,8 @@
         summary.innerHTML = `
           <p><strong>Итого: ${window.CartStore.formatRub(totals.total)}</strong></p>
           <div class="actions">
-            <a class="btn" href="catalog.html">Продолжить покупки</a>
-            <a class="btn primary" href="checkout.html">Оформить заказ</a>
+            <a class="btn" href="/catalog">Продолжить покупки</a>
+            <a class="btn primary" href="/checkout">Оформить заказ</a>
           </div>
         `;
 

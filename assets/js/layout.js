@@ -32,17 +32,19 @@ function renderLayout() {
   const footerMount = document.getElementById("footer-root");
   if (!headerMount || !footerMount) return;
 
-  const path = window.location.pathname.split("/").pop() || "index.html";
+  const pathname = window.location.pathname.replace(/\/+$/, "") || "/";
+  const lastSeg = pathname === "/" ? "index" : pathname.split("/").filter(Boolean).pop() || "index";
+  const pageKey = String(lastSeg).replace(/\.html$/i, "") || "index";
 
   headerMount.innerHTML = `
     <header class="site-header">
       <div class="container header-inner">
-        <a class="brand" href="index.html">Наконец-то вкусно</a>
+        <a class="brand" href="/">Наконец-то вкусно</a>
         <nav class="site-nav">
-          <a href="index.html" class="${path === "index.html" ? "active" : ""}">Главная</a>
-          <a href="catalog.html" class="${path === "catalog.html" ? "active" : ""}">Каталог</a>
-          <a href="cart.html" class="${path === "cart.html" ? "active" : ""}">Корзина <span id="cart-badge">0</span></a>
-          <a href="contacts.html" class="${path === "contacts.html" ? "active" : ""}">Контакты</a>
+          <a href="/" class="${pageKey === "index" ? "active" : ""}">Главная</a>
+          <a href="/catalog" class="${pageKey === "catalog" ? "active" : ""}">Каталог</a>
+          <a href="/cart" class="${pageKey === "cart" ? "active" : ""}">Корзина <span id="cart-badge">0</span></a>
+          <a href="/contacts" class="${pageKey === "contacts" ? "active" : ""}">Контакты</a>
         </nav>
       </div>
     </header>
@@ -57,7 +59,7 @@ function renderLayout() {
           <button type="button" class="theme-btn" data-theme-set="kitchen">Уютная кухня</button>
           <button type="button" class="theme-btn" data-theme-set="garden">Свежий сад</button>
         </div>
-        <a href="privacy.html">Политика конфиденциальности</a>
+        <a href="/privacy">Политика конфиденциальности</a>
       </div>
     </footer>
   `;
