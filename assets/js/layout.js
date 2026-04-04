@@ -148,6 +148,7 @@ function bindCartDropdown() {
   const dropdown = document.getElementById("cart-dropdown");
   if (!wrap || !trigger || !dropdown) return;
 
+  const mqMobile = window.matchMedia("(max-width: 700px)");
   const mqHover = window.matchMedia("(hover: hover)");
 
   function setOpen(open) {
@@ -157,6 +158,14 @@ function bindCartDropdown() {
 
   function onDocClick(e) {
     if (!wrap.contains(e.target)) setOpen(false);
+  }
+
+  if (mqMobile.matches) {
+    trigger.addEventListener("click", function (e) {
+      e.preventDefault();
+      window.location.href = "/cart";
+    });
+    return;
   }
 
   if (mqHover.matches) {
