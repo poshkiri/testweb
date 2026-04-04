@@ -70,7 +70,6 @@ async function handleSubmit(event) {
     window.localStorage.setItem("lastOrderDraft", JSON.stringify(data));
 
     window.CartStore.clearCart();
-    event.currentTarget.reset();
     renderCheckoutItems();
 
     if (data.paymentUrl) {
