@@ -59,6 +59,58 @@
         color: #2e7d32;
         font-weight: 600;
       }
+      .orders-head-row {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        margin-bottom: 12px;
+      }
+      .orders-section-title {
+        margin: 0;
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        flex-wrap: wrap;
+      }
+      .orders-new-badge {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 1.75rem;
+        height: 1.75rem;
+        padding: 0 8px;
+        border-radius: 999px;
+        font-size: 0.9rem;
+        font-weight: 700;
+        font-family: var(--font-body);
+        background: linear-gradient(135deg, var(--green) 0%, var(--green-dark) 100%);
+        color: #fff;
+        line-height: 1;
+      }
+      .orders-new-badge:empty,
+      .orders-new-badge[data-count="0"] {
+        opacity: 0.65;
+      }
+      .orders-filter-bar {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        margin-bottom: 8px;
+      }
+      .orders-filter-buttons {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        align-items: center;
+      }
+      .orders-search {
+        max-width: 420px;
+      }
+      .btn-copy-phone {
+        margin-top: 6px;
+      }
       .catalog-table-wrap {
         width: 100%;
         overflow-x: auto;
@@ -226,8 +278,28 @@
         </div>
 
         <section class="panel tab-panel is-active" id="orders-tab-content" aria-labelledby="tab-orders">
-          <div class="actions tab-actions">
+          <div class="orders-head-row tab-actions">
+            <h2 class="section-title orders-section-title">
+              Заказы <span id="orders-new-badge" class="orders-new-badge" data-count="0">0</span>
+            </h2>
             <button type="button" class="btn" id="btn-orders-refresh">Обновить</button>
+          </div>
+          <div class="orders-filter-bar">
+            <div class="orders-filter-buttons" role="group" aria-label="Фильтр по статусу доставки">
+              <button type="button" class="btn primary" data-order-filter="all">Все</button>
+              <button type="button" class="btn" data-order-filter="new">Новые</button>
+              <button type="button" class="btn" data-order-filter="preparing">Готовится</button>
+              <button type="button" class="btn" data-order-filter="delivering">В пути</button>
+              <button type="button" class="btn" data-order-filter="done">Доставлен</button>
+            </div>
+            <input
+              type="search"
+              id="orders-search"
+              class="orders-search"
+              placeholder="Поиск по имени или телефону"
+              autocomplete="off"
+              aria-label="Поиск по имени или телефону"
+            />
           </div>
           <p id="orders-msg" class="muted"></p>
           <div id="orders-list" class="orders-list"></div>
@@ -266,6 +338,10 @@
     <script>
       const TOKEN_KEY = "catalogAdminToken";
       const STATUS_OPTIONS = ["new", "preparing", "ready", "delivering", "done", "cancelled"];
+
+      let adminOrdersCache = [];
+      let adminOrdersStatusFilter = "all";
+      let adminOrdersSearchQuery = "";
 
       function getToken() {
         return String(document.getElementById("admin-token").value || "").trim();
@@ -506,16 +582,94 @@
         }
       }
 
-      function renderOrders(orders) {
+      function countNewOrders() {
+        return adminOrdersCache.filter(function (o) {
+          return (o.deliveryStatus || "new") === "new";
+        }).length;
+      }
+
+      function updateOrdersNewBadge() {
+        const el = document.getElementById("orders-new-badge");
+        if (!el) return;
+        const n = countNewOrders();
+        el.textContent = String(n);
+        el.dataset.count = String(n);
+      }
+
+      function getFilteredOrders() {
+        let list = adminOrdersCache.slice();
+        if (adminOrdersStatusFilter !== "all") {
+          list = list.filter(function (o) {
+            return (o.deliveryStatus || "new") === adminOrdersStatusFilter;
+          });
+        }
+        const q = adminOrdersSearchQuery.trim().toLowerCase();
+        if (q) {
+          const qDigits = q.replace(/\D/g, "");
+          list = list.filter(function (o) {
+            const name = String(o.customer?.name || "").toLowerCase();
+            const phone = String(o.customer?.phone || "").toLowerCase();
+            const phoneDigits = phone.replace(/\D/g, "");
+            if (name.includes(q)) return true;
+            if (phone.includes(q)) return true;
+            if (qDigits && phoneDigits.includes(qDigits)) return true;
+            return false;
+          });
+        }
+        return list;
+      }
+
+      function setOrdersFilterButtonsUI() {
+        document.querySelectorAll("[data-order-filter]").forEach(function (btn) {
+          const v = btn.getAttribute("data-order-filter");
+          btn.className = v === adminOrdersStatusFilter ? "btn primary" : "btn";
+        });
+      }
+
+      async function copyPhoneToClipboard(phone, btn) {
+        const text = String(phone || "").trim();
+        if (!text) return;
+        try {
+          await navigator.clipboard.writeText(text);
+        } catch (_e) {
+          const ta = document.createElement("textarea");
+          ta.value = text;
+          ta.setAttribute("readonly", "");
+          ta.style.position = "fixed";
+          ta.style.left = "-9999px";
+          document.body.appendChild(ta);
+          ta.select();
+          try {
+            document.execCommand("copy");
+          } catch (_e2) {
+            /* ignore */
+          }
+          document.body.removeChild(ta);
+        }
+        const orig = btn.textContent;
+        btn.textContent = "Скопировано!";
+        setTimeout(function () {
+          btn.textContent = orig;
+        }, 1000);
+      }
+
+      function renderOrdersList() {
         const root = document.getElementById("orders-list");
         root.innerHTML = "";
 
-        if (!orders.length) {
+        const filtered = getFilteredOrders();
+
+        if (!adminOrdersCache.length) {
           root.innerHTML = '<p class="muted">Заказов пока нет.</p>';
           return;
         }
 
-        for (const order of orders) {
+        if (!filtered.length) {
+          root.innerHTML = '<p class="muted">Нет заказов по выбранному фильтру или поиску.</p>';
+          return;
+        }
+
+        for (const order of filtered) {
           const card = document.createElement("article");
           card.className = "panel order-card";
 
@@ -531,14 +685,23 @@
 
           const customer = document.createElement("div");
           customer.className = "order-row";
+          const phoneRaw = order.customer?.phone || "—";
           customer.innerHTML =
             "<strong>Клиент</strong><br>" +
             (order.customer?.name || "—") +
             " · " +
-            (order.customer?.phone || "—") +
+            phoneRaw +
             "<br><span class='muted'>" +
             (order.customer?.address || "—") +
             "</span>";
+          const copyBtn = document.createElement("button");
+          copyBtn.type = "button";
+          copyBtn.className = "btn btn-copy-phone";
+          copyBtn.textContent = "📋 Скопировать телефон";
+          copyBtn.addEventListener("click", function () {
+            copyPhoneToClipboard(order.customer?.phone || "", copyBtn);
+          });
+          customer.appendChild(copyBtn);
           card.appendChild(customer);
 
           const items = document.createElement("div");
@@ -600,6 +763,12 @@
               if (!res.ok || !data.ok) {
                 throw new Error(data.message || "Ошибка изменения статуса");
               }
+              const cached = adminOrdersCache.find(function (x) {
+                return x.orderId === order.orderId;
+              });
+              if (cached) cached.deliveryStatus = select.value;
+              updateOrdersNewBadge();
+              renderOrdersList();
               savedNote.textContent = "Сохранено!";
               setTimeout(function () {
                 savedNote.textContent = "";
@@ -618,6 +787,23 @@
         }
       }
 
+      function wireOrdersFilters() {
+        document.querySelectorAll("[data-order-filter]").forEach(function (btn) {
+          btn.addEventListener("click", function () {
+            adminOrdersStatusFilter = btn.getAttribute("data-order-filter") || "all";
+            setOrdersFilterButtonsUI();
+            renderOrdersList();
+          });
+        });
+        const searchEl = document.getElementById("orders-search");
+        if (searchEl) {
+          searchEl.addEventListener("input", function () {
+            adminOrdersSearchQuery = searchEl.value || "";
+            renderOrdersList();
+          });
+        }
+      }
+
       async function refreshOrders() {
         setOrdersMessage("");
         const token = requireToken();
@@ -631,7 +817,10 @@
           if (!res.ok || !data.ok) {
             throw new Error(data.message || "Не удалось загрузить заказы");
           }
-          renderOrders(Array.isArray(data.orders) ? data.orders : []);
+          adminOrdersCache = Array.isArray(data.orders) ? data.orders : [];
+          updateOrdersNewBadge();
+          setOrdersFilterButtonsUI();
+          renderOrdersList();
           setOrdersMessage("Заказы обновлены.");
         } catch (e) {
           setOrdersMessage(e instanceof Error ? e.message : String(e), true);
@@ -672,6 +861,7 @@
           document.getElementById("catalog-body").appendChild(buildCatalogRow({}));
         });
         document.getElementById("btn-orders-refresh").addEventListener("click", refreshOrders);
+        wireOrdersFilters();
         document.getElementById("tab-orders").addEventListener("click", function () {
           activateTab("orders");
         });
