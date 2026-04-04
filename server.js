@@ -33,7 +33,29 @@ app.get("/catalog", (req, res) => res.sendFile(path.join(__dirname, "catalog.htm
 app.get("/cart", (req, res) => res.sendFile(path.join(__dirname, "cart.html")));
 app.get("/checkout", (req, res) => res.sendFile(path.join(__dirname, "checkout.html")));
 app.get("/contacts", (req, res) => res.sendFile(path.join(__dirname, "contacts.html")));
-app.get('/admin', (req, res) => res.sendFile(path.join(__dirname, 'admin.html')));
+app.get("/admin", (req, res) => {
+  const auth = req.headers.authorization || "";
+  const base64 = auth.startsWith("Basic ") ? auth.slice(6) : "";
+  let decoded = "";
+  try {
+    decoded = Buffer.from(base64, "base64").toString("utf8");
+  } catch (_e) {
+    decoded = "";
+  }
+  const colon = decoded.indexOf(":");
+  const user = colon === -1 ? decoded : decoded.slice(0, colon);
+  const pass = colon === -1 ? "" : decoded.slice(colon + 1);
+
+  const adminUser = process.env.ADMIN_USER || "admin";
+  const adminPass = process.env.ADMIN_PASSWORD || "";
+
+  if (!adminPass || user !== adminUser || pass !== adminPass) {
+    res.set("WWW-Authenticate", 'Basic realm="Admin Panel"');
+    return res.status(401).send("Доступ закрыт");
+  }
+
+  res.sendFile(path.join(__dirname, "admin.html"));
+});
 app.get("/payment-success", (req, res) => res.sendFile(path.join(__dirname, "payment-success.html")));
 app.get("/privacy", (req, res) => res.sendFile(path.join(__dirname, "privacy.html")));
 app.use(express.static(path.join(__dirname)));
