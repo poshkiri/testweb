@@ -58,6 +58,7 @@ app.get("/admin", (req, res) => {
 });
 app.get("/payment-success", (req, res) => res.sendFile(path.join(__dirname, "payment-success.html")));
 app.get("/privacy", (req, res) => res.sendFile(path.join(__dirname, "privacy.html")));
+app.get("/help", (req, res) => res.sendFile(path.join(__dirname, "help.html")));
 app.use(express.static(path.join(__dirname)));
 app.use("/uploads", express.static(UPLOADS_DIR));
 
