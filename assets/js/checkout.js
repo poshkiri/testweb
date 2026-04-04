@@ -44,30 +44,44 @@ async function handleSubmit(event) {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payload)
     });
-    const data = await response.json();
+
+    let data = {};
+    try {
+      data = await response.json();
+    } catch (_parseError) {
+      data = {};
+    }
 
     if (!response.ok || !data.ok) {
-      const message = Array.isArray(data.errors) ? data.errors.join(" ") : "Ошибка при оформлении заказа.";
+      let message = "";
+      if (Array.isArray(data.errors) && data.errors.length) {
+        message = data.errors.join(" ");
+      } else if (data.message) {
+        message = String(data.message);
+      } else if (!response.ok) {
+        message = "Ошибка " + response.status + (response.statusText ? ": " + response.statusText : "");
+      } else {
+        message = "Ошибка при оформлении заказа.";
+      }
       result.textContent = message;
       return;
     }
 
     window.localStorage.setItem("lastOrderDraft", JSON.stringify(data));
 
+    window.CartStore.clearCart();
+    event.currentTarget.reset();
+    renderCheckoutItems();
+
     if (data.paymentUrl) {
-      window.CartStore.clearCart();
-      event.currentTarget.reset();
-      renderCheckoutItems();
       window.location.href = data.paymentUrl;
       return;
     }
 
-    window.CartStore.clearCart();
-    event.currentTarget.reset();
-    renderCheckoutItems();
-    window.location.href = "/payment-success?orderId=" + encodeURIComponent(data.orderId);
-  } catch (_error) {
-    result.textContent = "Сервер недоступен. Проверьте, что backend запущен.";
+    window.location.href = "/payment-success?orderId=" + data.orderId;
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+    result.textContent = message || "Не удалось выполнить запрос.";
   }
 }
 
