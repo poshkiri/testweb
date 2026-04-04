@@ -11,7 +11,7 @@
   <body>
     <div id="header-root"></div>
     <main>
-      <div class="container">
+      <div class="container cart-list" style="gap: 40px">
         <section class="hero hero--home">
           <div class="hero__inner">
             <span class="hero__eyebrow">Домашняя кухня · с доставкой</span>
@@ -25,11 +25,186 @@
             </div>
           </div>
         </section>
+
+        <section aria-labelledby="popular-heading">
+          <h2 id="popular-heading" class="section-title">Популярные товары</h2>
+          <div id="home-popular-grid" class="grid"></div>
+          <div class="actions" style="margin-top: 8px">
+            <a class="btn primary" href="/catalog">Смотреть весь каталог</a>
+          </div>
+        </section>
+
+        <section class="panel" aria-labelledby="why-heading">
+          <h3 id="why-heading">Почему мы</h3>
+          <div class="grid" style="margin-top: 16px">
+            <article class="product-card">
+              <div class="product-content">
+                <strong>🏠 Домашняя кухня</strong>
+                <span class="muted">Готовим как дома, без консервантов</span>
+              </div>
+            </article>
+            <article class="product-card">
+              <div class="product-content">
+                <strong>❄️ Свежая заморозка</strong>
+                <span class="muted">Сохраняем вкус и пользу</span>
+              </div>
+            </article>
+            <article class="product-card">
+              <div class="product-content">
+                <strong>🚚 Быстрая доставка</strong>
+                <span class="muted">Оператор свяжется в течение часа</span>
+              </div>
+            </article>
+          </div>
+        </section>
+
+        <section class="panel" aria-labelledby="how-heading">
+          <h3 id="how-heading">Как это работает</h3>
+          <div class="grid" style="margin-top: 16px">
+            <article class="product-card">
+              <div class="product-content">
+                <strong>1️⃣ Выбираете блюда в каталоге</strong>
+              </div>
+            </article>
+            <article class="product-card">
+              <div class="product-content">
+                <strong>2️⃣ Оформляете заказ онлайн</strong>
+              </div>
+            </article>
+            <article class="product-card">
+              <div class="product-content">
+                <strong>3️⃣ Получаете свежие полуфабрикаты</strong>
+              </div>
+            </article>
+          </div>
+        </section>
       </div>
     </main>
     <div id="footer-root"></div>
     <script src="assets/js/products.js"></script>
     <script src="assets/js/cart.js"></script>
     <script src="assets/js/layout.js"></script>
+    <script>
+      function homePopularEmptyMessage() {
+        var hint = window.__catalogLoadHint;
+        if (hint === "empty") {
+          return (
+            "<p class='muted'>В каталоге пока нет товаров. Загляните позже или посмотрите " +
+            "<a href='/catalog'>весь каталог</a>.</p>"
+          );
+        }
+        if (hint === "failed") {
+          return (
+            "<p class='muted'><strong>Не удалось загрузить товары.</strong> Проверьте, что сайт открыт через сервер " +
+            "(например <code>http://localhost:…</code>), и обновите страницу.</p>"
+          );
+        }
+        return "<p class='muted'>Товары скоро появятся.</p>";
+      }
+
+      function homePopularButtonLabel(productId) {
+        var q = window.CartStore.getCartQuantity(productId);
+        return q > 0 ? "В корзине (" + q + ")" : "В корзину";
+      }
+
+      function renderHomePopular(products) {
+        var root = document.getElementById("home-popular-grid");
+        if (!root) return;
+        if (!products.length) {
+          root.innerHTML = homePopularEmptyMessage();
+          return;
+        }
+        root.innerHTML = products
+          .map(function (p) {
+            var name = window.escapeHtml(p.name);
+            var desc = window.escapeHtml(p.description || "");
+            var img = window.escapeHtml(p.image || "");
+            var id = window.escapeHtml(p.id);
+            var unit = window.escapeHtml(p.unit || "");
+            var btnLabel = homePopularButtonLabel(p.id);
+            return (
+              '<article class="product-card">' +
+              '<img src="' +
+              img +
+              '" alt="' +
+              name +
+              '" />' +
+              '<div class="product-content">' +
+              "<strong>" +
+              name +
+              "</strong>" +
+              '<span class="muted">' +
+              desc +
+              "</span>" +
+              '<div class="price-line">' +
+              "<span>" +
+              window.CartStore.formatRub(p.price) +
+              " / " +
+              unit +
+              "</span>" +
+              '<button type="button" class="btn btn--to-cart" data-id="' +
+              id +
+              '" data-name="' +
+              name +
+              '">' +
+              btnLabel +
+              "</button>" +
+              "</div>" +
+              "</div>" +
+              "</article>"
+            );
+          })
+          .join("");
+      }
+
+      function syncHomePopularCartButtons() {
+        var root = document.getElementById("home-popular-grid");
+        if (!root) return;
+        root.querySelectorAll("button.btn--to-cart[data-id]").forEach(function (btn) {
+          if (btn.classList.contains("btn--added-success")) return;
+          btn.textContent = homePopularButtonLabel(btn.dataset.id);
+        });
+      }
+
+      var homePopularAddToCartWired = false;
+      function wireHomePopularAddToCart() {
+        if (homePopularAddToCartWired) return;
+        var root = document.getElementById("home-popular-grid");
+        if (!root) return;
+        homePopularAddToCartWired = true;
+        root.addEventListener("click", function (e) {
+          var btn = e.target.closest("button.btn--to-cart[data-id]");
+          if (!btn || !root.contains(btn)) return;
+          var id = btn.dataset.id;
+          var productName = btn.dataset.name || "Товар";
+          if (btn._addRevertTimer) {
+            clearTimeout(btn._addRevertTimer);
+            btn._addRevertTimer = null;
+          }
+          btn.classList.remove("btn--added-success");
+          window.CartStore.addToCart(id, 1);
+          window.CartStore.showToast(productName + " добавлен в корзину");
+          btn.classList.add("btn--added-success");
+          btn.textContent = "✓ Добавлено";
+          btn._addRevertTimer = setTimeout(function () {
+            btn.classList.remove("btn--added-success");
+            btn.textContent = homePopularButtonLabel(id);
+            btn._addRevertTimer = null;
+          }, 1500);
+        });
+        window.addEventListener("cart:changed", syncHomePopularCartButtons);
+      }
+
+      document.addEventListener("DOMContentLoaded", function () {
+        wireHomePopularAddToCart();
+        if (typeof ensureProductsLoaded === "function") {
+          ensureProductsLoaded().then(function (list) {
+            renderHomePopular(list.slice(0, 4));
+          });
+        } else {
+          renderHomePopular((window.PRODUCTS || []).slice(0, 4));
+        }
+      });
+    </script>
   </body>
 </html>
