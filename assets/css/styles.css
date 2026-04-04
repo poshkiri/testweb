@@ -90,7 +90,7 @@ body {
   text-decoration: none;
   font-family: var(--font-display);
   font-weight: 600;
-  font-size: 1.35rem;
+  font-size: 1.5rem;
   letter-spacing: 0.02em;
   transition: color 0.2s ease;
 }
@@ -284,6 +284,21 @@ main {
   pointer-events: none;
 }
 
+.hero--home {
+  background-image: linear-gradient(
+      to right,
+      rgba(255, 253, 249, 0.97) 0%,
+      rgba(255, 253, 249, 0.95) 40%,
+      rgba(255, 253, 249, 0.3) 100%
+    ),
+    url("https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=1400&q=80");
+  background-size: cover;
+  background-position: center;
+  min-height: 320px;
+  display: flex;
+  align-items: center;
+}
+
 .hero--home .hero__inner {
   position: relative;
   z-index: 1;
@@ -372,12 +387,13 @@ main {
   display: flex;
   flex-direction: column;
   box-shadow: var(--shadow-sm);
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
 }
 
 .product-card:hover {
   transform: translateY(-4px);
-  box-shadow: var(--shadow);
+  box-shadow: 0 12px 32px rgba(107, 68, 35, 0.15);
+  border-color: var(--brown-light);
 }
 
 .product-card img {
@@ -412,10 +428,23 @@ main {
 }
 
 .section-title {
+  position: relative;
   margin: 0 0 20px;
+  padding-bottom: 12px;
   font-family: var(--font-display);
   font-size: clamp(1.6rem, 3vw, 2rem);
   font-weight: 600;
+}
+
+.section-title::after {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 48px;
+  height: 3px;
+  background: var(--green);
+  border-radius: 2px;
 }
 
 .panel {
