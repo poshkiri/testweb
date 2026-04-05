@@ -408,6 +408,21 @@ main {
   gap: 20px;
 }
 
+.why-cards {
+  margin-top: 16px;
+  align-items: stretch;
+}
+
+.why-cards .why-card {
+  min-height: 140px;
+}
+
+.why-card__icon {
+  display: block;
+  font-size: 1.35rem;
+  line-height: 1.2;
+}
+
 .product-card {
   background: var(--surface);
   border: 1px solid var(--border);
