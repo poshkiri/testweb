@@ -237,39 +237,9 @@ function bindCartDropdown() {
   });
 }
 
-const words = [
-  "Голубцы",
-  "Котлеты",
-  "Блины",
-  "Пельмени",
-  "Сырники",
-  "Фрикадельки",
-  "Полуфабрикаты",
-];
-
-let currentIndex = 0;
-
-function animateWord() {
-  const el = document.getElementById("animated-word");
-  if (!el) return;
-
-  el.style.opacity = "0";
-  el.style.transform = "translateY(-10px)";
-
-  setTimeout(() => {
-    currentIndex = (currentIndex + 1) % words.length;
-    el.textContent = words[currentIndex];
-    el.style.opacity = "1";
-    el.style.transform = "translateY(0)";
-  }, 300);
-}
-
 window.addEventListener("cart:changed", updateCartBadge);
 window.addEventListener("products:loaded", updateCartBadge);
 window.addEventListener("DOMContentLoaded", () => {
   renderLayout();
   updateCartBadge();
-  if (document.getElementById("animated-word")) {
-    setInterval(animateWord, 2000);
-  }
 });
