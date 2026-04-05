@@ -35,15 +35,6 @@
               <a class="btn" href="/contacts">Условия доставки</a>
             </div>
           </div>
-          <div class="hero__media" aria-hidden="true">
-            <img
-              src="https://images.unsplash.com/photo-1547592180-85f173990554?w=800&q=80"
-              alt=""
-              width="800"
-              height="600"
-              loading="eager"
-            />
-          </div>
         </section>
 
         <section aria-labelledby="popular-heading">
@@ -74,19 +65,19 @@
         <section class="panel" aria-labelledby="why-heading">
           <h3 id="why-heading">Почему мы</h3>
           <div class="grid" style="margin-top: 16px">
-            <article class="product-card animate-on-scroll">
+            <article class="product-card">
               <div class="product-content">
                 <strong>🏠 Домашняя кухня</strong>
                 <span class="muted">Готовим как дома, без консервантов</span>
               </div>
             </article>
-            <article class="product-card animate-on-scroll">
+            <article class="product-card">
               <div class="product-content">
                 <strong>❄️ Свежая заморозка</strong>
                 <span class="muted">Сохраняем вкус и пользу</span>
               </div>
             </article>
-            <article class="product-card animate-on-scroll">
+            <article class="product-card">
               <div class="product-content">
                 <strong>🚚 Быстрая доставка</strong>
                 <span class="muted">Оператор свяжется в течение часа</span>
@@ -98,7 +89,7 @@
         <section class="reviews-section" aria-labelledby="reviews-heading">
           <h2 id="reviews-heading" class="section-title">Что говорят покупатели</h2>
           <div class="reviews-grid">
-            <blockquote class="panel review-card animate-on-scroll">
+            <blockquote class="panel review-card">
               <p class="review-card__text">
                 Целый день ждала попробовать капусту — это реально гастрономический оргазм! Упаковка, состав, дата
                 изготовления — всё очень покупабельно. Благодарю!
@@ -106,7 +97,7 @@
               <p class="review-card__stars" aria-label="Оценка 5 из 5">★★★★★</p>
               <footer class="review-card__author">Анжелика</footer>
             </blockquote>
-            <blockquote class="panel review-card animate-on-scroll">
+            <blockquote class="panel review-card">
               <p class="review-card__text">
                 Это божественно! Мы с дочкой в первый же день умяли все блины. Капусту съели моментально, котлетки
                 невероятные, качество мяса просто на высоте!
@@ -114,7 +105,7 @@
               <p class="review-card__stars" aria-label="Оценка 5 из 5">★★★★★</p>
               <footer class="review-card__author">Покупательница</footer>
             </blockquote>
-            <blockquote class="panel review-card animate-on-scroll">
+            <blockquote class="panel review-card">
               <p class="review-card__text">
                 Гнёзда и биточки с сыром — вкусно! Мясо само со вкусом мяса, чего не хватает многим полуфабрикатам.
                 Капуста — просто космос, уже скинула ссылку подружкам!
@@ -128,17 +119,17 @@
         <section class="panel" aria-labelledby="how-heading">
           <h3 id="how-heading">Как это работает</h3>
           <div class="grid" style="margin-top: 16px">
-            <article class="product-card animate-on-scroll">
+            <article class="product-card">
               <div class="product-content">
                 <strong>1️⃣ Выбираете блюда в каталоге</strong>
               </div>
             </article>
-            <article class="product-card animate-on-scroll">
+            <article class="product-card">
               <div class="product-content">
                 <strong>2️⃣ Оформляете заказ онлайн</strong>
               </div>
             </article>
-            <article class="product-card animate-on-scroll">
+            <article class="product-card">
               <div class="product-content">
                 <strong>3️⃣ Получаете свежие полуфабрикаты</strong>
               </div>
@@ -190,7 +181,7 @@
             var unit = window.escapeHtml(p.unit || "");
             var btnLabel = homePopularButtonLabel(p.id);
             return (
-              '<article class="product-card animate-on-scroll">' +
+              '<article class="product-card">' +
               '<img src="' +
               img +
               '" alt="' +
@@ -264,19 +255,12 @@
 
       document.addEventListener("DOMContentLoaded", function () {
         wireHomePopularAddToCart();
-        function afterHomePopularRendered() {
-          if (typeof window.initScrollAnimations === "function") {
-            window.initScrollAnimations();
-          }
-        }
         if (typeof ensureProductsLoaded === "function") {
           ensureProductsLoaded().then(function (list) {
             renderHomePopular(list.slice(0, 4));
-            afterHomePopularRendered();
           });
         } else {
           renderHomePopular((window.PRODUCTS || []).slice(0, 4));
-          afterHomePopularRendered();
         }
       });
     </script>
