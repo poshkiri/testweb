@@ -785,6 +785,7 @@ select:focus {
 
 .fab-phone {
   background: #fff;
+  border: 2px solid #e0e0e0;
 }
 
 .fab-whatsapp {
@@ -796,7 +797,7 @@ select:focus {
 }
 
 .fab-instagram {
-  background: #e1306c;
+  background: linear-gradient(45deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888);
 }
 
 .theme-switch {
