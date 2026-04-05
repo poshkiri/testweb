@@ -237,9 +237,37 @@ function bindCartDropdown() {
   });
 }
 
+let scrollAnimationObserver = null;
+
+function initScrollAnimations() {
+  if (typeof IntersectionObserver === "undefined") {
+    document.querySelectorAll(".animate-on-scroll").forEach((el) => el.classList.add("visible"));
+    return;
+  }
+  if (!scrollAnimationObserver) {
+    scrollAnimationObserver = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add("visible");
+          }
+        });
+      },
+      { threshold: 0.1 }
+    );
+  }
+  document.querySelectorAll(".animate-on-scroll:not([data-scroll-observed])").forEach((el) => {
+    el.setAttribute("data-scroll-observed", "");
+    scrollAnimationObserver.observe(el);
+  });
+}
+
+window.initScrollAnimations = initScrollAnimations;
+
 window.addEventListener("cart:changed", updateCartBadge);
 window.addEventListener("products:loaded", updateCartBadge);
 window.addEventListener("DOMContentLoaded", () => {
   renderLayout();
   updateCartBadge();
+  initScrollAnimations();
 });
