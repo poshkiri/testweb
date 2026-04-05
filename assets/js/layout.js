@@ -1,33 +1,4 @@
-function applyThemeFromUrl() {
-  const q = new URLSearchParams(window.location.search).get("theme");
-  if (q === "garden" || q === "kitchen") {
-    localStorage.setItem("siteTheme", q);
-    document.documentElement.dataset.theme = q;
-  }
-}
-
-function bindThemeSwitcher() {
-  const buttons = document.querySelectorAll("[data-theme-set]");
-  buttons.forEach((btn) => {
-    btn.addEventListener("click", () => {
-      const t = btn.getAttribute("data-theme-set");
-      if (t !== "garden" && t !== "kitchen") return;
-      localStorage.setItem("siteTheme", t);
-      document.documentElement.dataset.theme = t;
-      buttons.forEach((b) => {
-        b.classList.toggle("is-active", b.getAttribute("data-theme-set") === t);
-      });
-    });
-  });
-  const current = document.documentElement.dataset.theme || "kitchen";
-  buttons.forEach((b) => {
-    b.classList.toggle("is-active", b.getAttribute("data-theme-set") === current);
-  });
-}
-
 function renderLayout() {
-  applyThemeFromUrl();
-
   const headerMount = document.getElementById("header-root");
   const footerMount = document.getElementById("footer-root");
   if (!headerMount || !footerMount) return;
@@ -82,11 +53,6 @@ function renderLayout() {
               <line x1="17.5" y1="6.5" x2="17.51" y2="6.5" />
             </svg>
           </a>
-        </div>
-        <div class="theme-switch" aria-label="Варианты оформления сайта">
-          <span class="theme-switch__label">Оформление:</span>
-          <button type="button" class="theme-btn" data-theme-set="kitchen">Уютная кухня</button>
-          <button type="button" class="theme-btn" data-theme-set="garden">Свежий сад</button>
         </div>
         <a href="/privacy">Политика конфиденциальности</a>
       </div>
@@ -148,7 +114,6 @@ function renderLayout() {
     </div>
   `;
 
-  bindThemeSwitcher();
   bindCartDropdown();
 }
 

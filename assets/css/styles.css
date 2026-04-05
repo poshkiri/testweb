@@ -817,12 +817,7 @@ select:focus {
 }
 
 .theme-switch {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 8px 12px;
-  font-size: 0.88rem;
-  color: var(--muted);
+  display: none;
 }
 
 .theme-switch__label {
