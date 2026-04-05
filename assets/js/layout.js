@@ -68,6 +68,21 @@ function renderLayout() {
     <footer class="site-footer">
       <div class="container footer-inner">
         <p>© ${new Date().getFullYear()} Наконец-то вкусно</p>
+        <div class="footer-social" aria-label="Соцсети">
+          <a
+            class="footer-social-link"
+            href="https://www.instagram.com/nakonez_vkusno/"
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label="Instagram — @nakonez_vkusno"
+          >
+            <svg class="footer-social-icon" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <rect x="2" y="2" width="20" height="20" rx="5" ry="5" />
+              <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z" />
+              <line x1="17.5" y1="6.5" x2="17.51" y2="6.5" />
+            </svg>
+          </a>
+        </div>
         <div class="theme-switch" aria-label="Варианты оформления сайта">
           <span class="theme-switch__label">Оформление:</span>
           <button type="button" class="theme-btn" data-theme-set="kitchen">Уютная кухня</button>
