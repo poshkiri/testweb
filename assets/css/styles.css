@@ -354,6 +354,12 @@ main {
   color: var(--text);
 }
 
+#animated-word {
+  display: inline-block;
+  color: var(--green);
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
 .hero .muted,
 .hero__lead {
   margin: 0;
